@@ -712,13 +712,13 @@ elif st.session_state.step == STEP_THANKYOU:
   <h1 style="color:#1e293b;">Hartelijk bedankt voor uw deelname!</h1>
   <p style="font-size:1.1rem;color:#475569;max-width:500px;margin:1rem auto 2rem;">
     Uw antwoorden zijn succesvol opgeslagen en dragen bij aan het onderzoek naar
-    succesfactoren voor voorstedelijk spoorvervoer.
+    succesfactoren voor stadsgewestelijk spoorvervoer.
   </p>
   <hr style="border:none;border-top:1px solid #e2e8f0;margin:2rem 0;">
   <p style="color:#64748b;font-size:0.95rem;">
     Heeft u vragen over het onderzoek? Neem dan contact op via:<br>
     <strong>📧 <a href="mailto:l.spijker@student.utwente.nl" style="color:#3b82f6;">
-    l.spijker@student.utwente.nl</a></strong>
+    l.m.spijker@student.utwente.nl</a></strong>
   </p>
   <p style="color:#94a3b8;font-size:0.9rem;margin-top:2rem;">
     U kunt dit tabblad nu sluiten.
