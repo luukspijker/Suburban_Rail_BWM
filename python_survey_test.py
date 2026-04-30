@@ -4,7 +4,6 @@
 import streamlit as st
 import json
 import random
-import math
 import gspread
 from google.oauth2.service_account import Credentials
 from datetime import datetime
@@ -173,7 +172,8 @@ STEP_CAT_CMP          = 4        # category bto+otw comparisons (separate page)
 # STEP_FACTOR_SEL_START + 2*i+1 = bto+otw comparisons for category i
 STEP_FACTOR_SEL_START = 5
 STEP_SUMMARY          = 5 + 2 * N
-TOTAL_STEPS           = STEP_SUMMARY
+STEP_THANKYOU         = 5 + 2 * N + 1
+TOTAL_STEPS           = STEP_SUMMARY  # progress bar goes up to summary only
 
 # ─────────────────────────────────────────────
 # SESSION STATE
@@ -240,6 +240,7 @@ def save_to_sheets(data: dict):
             p.get("ervaring", ""),
             data.get("categorie_best", ""),
             data.get("categorie_worst", ""),
+            data.get("opmerkingen", ""),
         ]
 
         # Category bto values
@@ -265,7 +266,7 @@ def save_to_sheets(data: dict):
             header = [
                 "Timestamp", "Naam", "Titel", "Organisatie", "Rol",
                 "Expertise", "Opleiding", "Ervaring",
-                "Categorie Best", "Categorie Worst",
+                "Categorie Best", "Categorie Worst", "Opmerkingen",
             ]
             for cat in cat_list:
                 header.append(f"BTO: {cat}")
@@ -386,6 +387,8 @@ def card_select(options, state_key, descriptions=None):
             f'font-size:0.85rem;color:#1e3a5f;line-height:1.5;">'
             f'<strong>{current}:</strong> {descriptions[current]}</div>',
             unsafe_allow_html=True)
+    elif not current:
+        st.caption("👆 Klik op een optie om de omschrijving te zien.")
     st.markdown("")
     return current
 
@@ -412,10 +415,12 @@ def image_placeholder():
 # ─────────────────────────────────────────────
 # PROGRESS BAR + IMAGE PLACEHOLDER
 # ─────────────────────────────────────────────
-st.progress((st.session_state.step - 1) / max(TOTAL_STEPS - 1, 1))
-st.caption(f"Stap {st.session_state.step} van {TOTAL_STEPS}")
-st.markdown("---")
-image_placeholder()
+if st.session_state.step < STEP_THANKYOU:
+    pct = min((st.session_state.step - 1) / max(TOTAL_STEPS - 1, 1), 1.0)
+    st.progress(pct)
+    st.caption(f"Voortgang: **{int(pct * 100)}%** voltooid")
+    st.markdown("---")
+    image_placeholder()
 
 # ══════════════════════════════════════════════
 # STEP 1: INTRODUCTIE
@@ -672,6 +677,17 @@ elif st.session_state.step == STEP_SUMMARY:
                     st.write(f"- {k}: {v} ({scale.get(v,'?')})")
 
     st.markdown("---")
+    st.subheader("💬 Opmerkingen & aanbevelingen")
+    st.markdown("Heeft u nog opmerkingen, vragen of aanbevelingen met betrekking tot dit onderzoek?")
+    opmerkingen = st.text_area(
+        "Uw opmerkingen (optioneel)",
+        value=st.session_state.data.get("opmerkingen", ""),
+        height=120,
+        placeholder="Typ hier eventuele opmerkingen..."
+    )
+    st.session_state.data["opmerkingen"] = opmerkingen
+
+    st.markdown("---")
     col1, col2 = st.columns(2)
     col1.button("← Vorige", on_click=prev_step)
     if col2.button("📨 Verzend enquête", type="primary"):
@@ -679,7 +695,33 @@ elif st.session_state.step == STEP_SUMMARY:
             success = save_to_sheets(st.session_state.data)
         if success:
             clear_progress()
-            st.success("🎉 Bedankt voor uw deelname! Uw antwoorden zijn succesvol verzonden.")
-            st.balloons()
-        with st.expander("📋 Ruwe data (voor ontwikkeling)", expanded=False):
-            st.json(st.session_state.data)
+            st.session_state.step = STEP_THANKYOU
+            st.rerun()
+        else:
+            with st.expander("📋 Ruwe data (voor ontwikkeling)", expanded=False):
+                st.json(st.session_state.data)
+
+# ══════════════════════════════════════════════
+# THANK-YOU PAGE
+# ══════════════════════════════════════════════
+elif st.session_state.step == STEP_THANKYOU:
+    st.balloons()
+    st.markdown("""
+<div style="text-align:center;padding:3rem 1rem;">
+  <div style="font-size:4rem;margin-bottom:1rem;">🎉</div>
+  <h1 style="color:#1e293b;">Hartelijk bedankt voor uw deelname!</h1>
+  <p style="font-size:1.1rem;color:#475569;max-width:500px;margin:1rem auto 2rem;">
+    Uw antwoorden zijn succesvol opgeslagen en dragen bij aan het onderzoek naar
+    succesfactoren voor voorstedelijk spoorvervoer.
+  </p>
+  <hr style="border:none;border-top:1px solid #e2e8f0;margin:2rem 0;">
+  <p style="color:#64748b;font-size:0.95rem;">
+    Heeft u vragen over het onderzoek? Neem dan contact op via:<br>
+    <strong>📧 <a href="mailto:l.spijker@student.utwente.nl" style="color:#3b82f6;">
+    l.spijker@student.utwente.nl</a></strong>
+  </p>
+  <p style="color:#94a3b8;font-size:0.9rem;margin-top:2rem;">
+    U kunt dit tabblad nu sluiten.
+  </p>
+</div>
+""", unsafe_allow_html=True)
