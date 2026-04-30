@@ -4,6 +4,7 @@
 import streamlit as st
 import json
 import random
+import math
 import gspread
 from google.oauth2.service_account import Credentials
 from datetime import datetime
@@ -182,6 +183,17 @@ for _k, _v in [("step", STEP_INTRO), ("data", {}), ("errors", []), ("prev_step",
     if _k not in st.session_state:
         st.session_state[_k] = _v
 
+# Generate unique respondent ID and record start time on first load
+if "respondent_id" not in st.session_state:
+    import string
+    _chars = string.ascii_uppercase + string.digits
+    st.session_state.respondent_id = (
+        ''.join(random.choices(_chars, k=3)) + '-' +
+        ''.join(random.choices(_chars, k=3))
+    )
+if "start_time" not in st.session_state:
+    st.session_state.start_time = datetime.now()
+
 # ─────────────────────────────────────────────
 # PERSISTENCE
 # ─────────────────────────────────────────────
@@ -229,8 +241,14 @@ def save_to_sheets(data: dict):
         otw  = data.get("categorie_others_to_worst", {})
         fac  = data.get("factoren", {})
 
+        submit_time = datetime.now()
+        start_time  = st.session_state.get("start_time", submit_time)
+        duration_min = round((submit_time - start_time).total_seconds() / 60, 1)
+
         row = [
-            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            st.session_state.get("respondent_id", ""),
+            submit_time.strftime("%Y-%m-%d %H:%M:%S"),
+            duration_min,
             p.get("naam", ""),
             p.get("titel", ""),
             p.get("organisatie", ""),
@@ -264,7 +282,8 @@ def save_to_sheets(data: dict):
         # Write header row if sheet is empty
         if sheet.row_count == 0 or not sheet.row_values(1):
             header = [
-                "Timestamp", "Naam", "Titel", "Organisatie", "Rol",
+                "Respondent ID", "Timestamp", "Duur (min)",
+                "Naam", "Titel", "Organisatie", "Rol",
                 "Expertise", "Opleiding", "Ervaring",
                 "Categorie Best", "Categorie Worst", "Opmerkingen",
             ]
@@ -712,12 +731,12 @@ elif st.session_state.step == STEP_THANKYOU:
   <h1 style="color:#1e293b;">Hartelijk bedankt voor uw deelname!</h1>
   <p style="font-size:1.1rem;color:#475569;max-width:500px;margin:1rem auto 2rem;">
     Uw antwoorden zijn succesvol opgeslagen en dragen bij aan het onderzoek naar
-    succesfactoren voor stadsgewestelijk spoorvervoer.
+    succesfactoren voor voorstedelijk spoorvervoer.
   </p>
   <hr style="border:none;border-top:1px solid #e2e8f0;margin:2rem 0;">
   <p style="color:#64748b;font-size:0.95rem;">
     Heeft u vragen over het onderzoek? Neem dan contact op via:<br>
-    <strong>📧 <a href="mailto:l.spijker@student.utwente.nl" style="color:#3b82f6;">
+    <strong>📧 <a href="mailto:l.m.spijker@student.utwente.nl" style="color:#3b82f6;">
     l.m.spijker@student.utwente.nl</a></strong>
   </p>
   <p style="color:#94a3b8;font-size:0.9rem;margin-top:2rem;">
