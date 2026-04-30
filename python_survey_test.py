@@ -5,6 +5,9 @@ import streamlit as st
 import json
 import random
 import math
+import gspread
+from google.oauth2.service_account import Credentials
+from datetime import datetime
 
 st.set_page_config(page_title="BWM Enquête", layout="wide", page_icon="🚆")
 
@@ -194,6 +197,94 @@ def clear_progress():
     st.components.v1.html(
         "<script>try{localStorage.removeItem('bwm_data');"
         "localStorage.removeItem('bwm_step');}catch(e){}</script>", height=0)
+
+# ─────────────────────────────────────────────
+# GOOGLE SHEETS EXPORT
+# ─────────────────────────────────────────────
+def save_to_sheets(data: dict):
+    """
+    Saves survey response as a new row in Google Sheets.
+    Credentials are loaded from st.secrets["gcp_service_account"].
+    The sheet is identified by st.secrets["sheet_url"].
+
+    To set up:
+    1. Add your service account JSON to Streamlit secrets as [gcp_service_account]
+    2. Add your sheet URL to secrets as sheet_url = "https://docs.google.com/..."
+    3. Share the sheet with the service account email address
+    """
+    try:
+        scopes = [
+            "https://www.googleapis.com/auth/spreadsheets",
+            "https://www.googleapis.com/auth/drive",
+        ]
+        creds = Credentials.from_service_account_info(
+            st.secrets["gcp_service_account"], scopes=scopes
+        )
+        client = gspread.authorize(creds)
+        sheet  = client.open_by_url(st.secrets["sheet_url"]).sheet1
+
+        # Build flat row from nested data
+        p    = data.get("persoonlijk", {})
+        bto  = data.get("categorie_best_to_others", {})
+        otw  = data.get("categorie_others_to_worst", {})
+        fac  = data.get("factoren", {})
+
+        row = [
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            p.get("naam", ""),
+            p.get("titel", ""),
+            p.get("organisatie", ""),
+            p.get("rol", ""),
+            p.get("expertise", ""),
+            p.get("opleiding", ""),
+            p.get("ervaring", ""),
+            data.get("categorie_best", ""),
+            data.get("categorie_worst", ""),
+        ]
+
+        # Category bto values
+        for cat in cat_list:
+            row.append(bto.get(cat, ""))
+
+        # Category otw values
+        for cat in cat_list:
+            row.append(otw.get(cat, ""))
+
+        # Factor best, worst, bto, otw per category
+        for cat in cat_list:
+            cd = fac.get(cat, {})
+            row.append(cd.get("best", ""))
+            row.append(cd.get("worst", ""))
+            for f in categories[cat]:
+                row.append(cd.get("best_to_others", {}).get(f, ""))
+            for f in categories[cat]:
+                row.append(cd.get("others_to_worst", {}).get(f, ""))
+
+        # Write header row if sheet is empty
+        if sheet.row_count == 0 or not sheet.row_values(1):
+            header = [
+                "Timestamp", "Naam", "Titel", "Organisatie", "Rol",
+                "Expertise", "Opleiding", "Ervaring",
+                "Categorie Best", "Categorie Worst",
+            ]
+            for cat in cat_list:
+                header.append(f"BTO: {cat}")
+            for cat in cat_list:
+                header.append(f"OTW: {cat}")
+            for cat in cat_list:
+                header += [f"{cat} Best", f"{cat} Worst"]
+                for f in categories[cat]:
+                    header.append(f"{cat} BTO: {f}")
+                for f in categories[cat]:
+                    header.append(f"{cat} OTW: {f}")
+            sheet.append_row(header)
+
+        sheet.append_row(row)
+        return True
+
+    except Exception as e:
+        st.error(f"❌ Fout bij opslaan naar Google Sheets: {e}")
+        return False
 
 # ─────────────────────────────────────────────
 # NAVIGATION
@@ -584,8 +675,11 @@ elif st.session_state.step == STEP_SUMMARY:
     col1, col2 = st.columns(2)
     col1.button("← Vorige", on_click=prev_step)
     if col2.button("📨 Verzend enquête", type="primary"):
-        clear_progress()
-        st.success("🎉 Bedankt voor uw deelname! Uw antwoorden zijn succesvol verzonden.")
-        st.balloons()
+        with st.spinner("Antwoorden opslaan..."):
+            success = save_to_sheets(st.session_state.data)
+        if success:
+            clear_progress()
+            st.success("🎉 Bedankt voor uw deelname! Uw antwoorden zijn succesvol verzonden.")
+            st.balloons()
         with st.expander("📋 Ruwe data (voor ontwikkeling)", expanded=False):
             st.json(st.session_state.data)
