@@ -165,15 +165,16 @@ scale_labels = list(scale.keys())
 cat_list = list(categories.keys())
 N = len(cat_list)
 STEP_INTRO            = 1
-STEP_PERSONAL         = 2
-STEP_CAT_SELECT       = 3        # best+worst category (separate page)
-STEP_CAT_CMP          = 4        # category bto+otw comparisons (separate page)
+STEP_CONSENT          = 2        # GDPR consent page
+STEP_PERSONAL         = 3
+STEP_CAT_SELECT       = 4        # best+worst category (separate page)
+STEP_CAT_CMP          = 5        # category bto+otw comparisons (separate page)
 # Per category: 2 pages each
 # STEP_FACTOR_SEL_START + 2*i   = select best+worst for category i
 # STEP_FACTOR_SEL_START + 2*i+1 = bto+otw comparisons for category i
-STEP_FACTOR_SEL_START = 5
-STEP_SUMMARY          = 5 + 2 * N
-STEP_THANKYOU         = 5 + 2 * N + 1
+STEP_FACTOR_SEL_START = 6
+STEP_SUMMARY          = 6 + 2 * N
+STEP_THANKYOU         = 6 + 2 * N + 1
 TOTAL_STEPS           = STEP_SUMMARY  # progress bar goes up to summary only
 
 # ─────────────────────────────────────────────
@@ -465,13 +466,67 @@ relatieve belangrijkheid van factoren te beoordelen via de Best-Worst Methode.
     st.button("Start enquête →", on_click=next_step, type="primary")
 
 # ══════════════════════════════════════════════
-# STEP 2: PERSOONLIJKE GEGEVENS
+# STEP 2: TOESTEMMING (GDPR CONSENT)
+# ══════════════════════════════════════════════
+elif st.session_state.step == STEP_CONSENT:
+    st.title("📋 Toestemming & Privacy")
+    st.markdown("""
+### Informatie over dit onderzoek
+
+Dit onderzoek wordt uitgevoerd door **Luuk Spijker** als onderdeel van een afstudeeronderzoek
+aan de **Universiteit Twente** (faculteit ITC / Civiele Techniek).
+
+Het doel is het bepalen van de relatieve belangrijkheid van succesfactoren voor voorstedelijk
+spoorvervoer met behulp van de Best-Worst Methode (BWM).
+""")
+
+    st.markdown("---")
+    st.subheader("🔒 Hoe gaan wij om met uw gegevens?")
+    st.markdown("""
+- **Wat wordt verzameld:** uw rol, organisatie, expertisegebied en de antwoorden op de vergelijkingsvragen.
+  Uw naam is **optioneel** en niet vereist voor deelname.
+- **Opslag:** alle gegevens worden opgeslagen in een beveiligd Google Workspace-account
+  gekoppeld aan de Universiteit Twente (@utwente.nl).
+- **Toegang:** alleen de onderzoeker (Luuk Spijker) en de begeleidende supervisor hebben
+  toegang tot de ruwe data.
+- **Bewaartermijn:** alle verzamelde data wordt verwijderd na afronding en goedkeuring
+  van het onderzoek (uiterlijk december 2025).
+- **Rechtsgrond:** deelname is vrijwillig en gebaseerd op uw toestemming (AVG Art. 6(1)(a)).
+- **Recht op intrekking:** u kunt uw deelname te allen tijde intrekken en verzoeken om
+  verwijdering van uw data door contact op te nemen via
+  **l.spijker@student.utwente.nl**.
+- **Privacyverklaring:** zie de [privacyverklaring van de Universiteit Twente](https://www.utwente.nl/en/privacy/).
+""")
+
+    st.markdown("---")
+    st.subheader("✅ Toestemming")
+    st.markdown("Vink de onderstaande verklaring aan om door te gaan met de enquête.")
+
+    c1 = st.checkbox(
+        "Ik heb de bovenstaande informatie gelezen en begrepen, en ik geef toestemming "
+        "voor de verwerking van mijn antwoorden ten behoeve van dit onderzoek.")
+    c2 = st.checkbox(
+        "Ik begrijp dat mijn deelname vrijwillig is en dat ik mijn toestemming te allen "
+        "tijde kan intrekken door contact op te nemen met de onderzoeker.")
+
+    all_consent = c1 and c2
+
+    if not all_consent:
+        st.info("Vink beide vakjes aan om door te gaan.")
+
+    col1, col2 = st.columns(2)
+    col1.button("← Vorige", on_click=prev_step)
+    col2.button("Volgende →", on_click=next_step,
+                disabled=not all_consent, type="primary")
+
+# ══════════════════════════════════════════════
+# STEP 3: PERSOONLIJKE GEGEVENS
 # ══════════════════════════════════════════════
 elif st.session_state.step == STEP_PERSONAL:
     st.title("Persoonlijke informatie")
-    st.markdown("Verplichte velden zijn gemarkeerd met *")
+    st.markdown("Velden gemarkeerd met * zijn verplicht. Uw naam is optioneel.")
     p = st.session_state.data.get("persoonlijk", {})
-    naam        = st.text_input("Volledige naam *",      value=p.get("naam",""))
+    naam        = st.text_input("Volledige naam (optioneel)", value=p.get("naam",""))
     titel       = st.text_input("Titel(s)",              value=p.get("titel",""))
     organisatie = st.text_input("Organisatie *",         value=p.get("organisatie",""))
     expertise   = st.text_input("Expertise / vakgebied", value=p.get("expertise",""))
@@ -488,7 +543,6 @@ elif st.session_state.step == STEP_PERSONAL:
         "naam":naam,"titel":titel,"organisatie":organisatie,
         "rol":rol,"expertise":expertise,"opleiding":opleiding,"ervaring":ervaring}
     errors = []
-    if not naam.strip():         errors.append("⚠️ Naam is verplicht.")
     if not organisatie.strip():  errors.append("⚠️ Organisatie is verplicht.")
     if rol == "-- Selecteer --": errors.append("⚠️ Selecteer een rol.")
     show_errors()
@@ -736,8 +790,8 @@ elif st.session_state.step == STEP_THANKYOU:
   <hr style="border:none;border-top:1px solid #e2e8f0;margin:2rem 0;">
   <p style="color:#64748b;font-size:0.95rem;">
     Heeft u vragen over het onderzoek? Neem dan contact op via:<br>
-    <strong>📧 <a href="mailto:l.m.spijker@student.utwente.nl" style="color:#3b82f6;">
-    l.m.spijker@student.utwente.nl</a></strong>
+    <strong>📧 <a href="mailto:l.spijker@student.utwente.nl" style="color:#3b82f6;">
+    l.spijker@student.utwente.nl</a></strong>
   </p>
   <p style="color:#94a3b8;font-size:0.9rem;margin-top:2rem;">
     U kunt dit tabblad nu sluiten.
