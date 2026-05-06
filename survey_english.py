@@ -220,20 +220,25 @@ def save_to_sheets(data: dict):
             data.get("categorie_best", ""), data.get("categorie_worst", ""),
             data.get("opmerkingen", ""),
         ]
+        def to_num(label):
+            """Convert linguistic scale label to numeric value, or return as-is."""
+            return scale.get(label, label) if label else ""
+
         for cat in cat_list:
-            row.append(bto.get(cat, ""))
+            row.append(to_num(bto.get(cat, "")))
         for cat in cat_list:
-            row.append(otw.get(cat, ""))
+            row.append(to_num(otw.get(cat, "")))
         for cat in cat_list:
             cd = fac.get(cat, {})
             row.append(cd.get("best", ""))
             row.append(cd.get("worst", ""))
             for f in categories[cat]:
-                row.append(cd.get("best_to_others", {}).get(f, ""))
+                row.append(to_num(cd.get("best_to_others", {}).get(f, "")))
             for f in categories[cat]:
-                row.append(cd.get("others_to_worst", {}).get(f, ""))
+                row.append(to_num(cd.get("others_to_worst", {}).get(f, "")))
 
-        if sheet.row_count == 0 or not sheet.row_values(1):
+        existing = sheet.row_values(1) if sheet.row_count > 0 else []
+        if not existing:
             header = ["Respondent ID", "Timestamp", "Duration (min)", "Language",
                       "Name", "Title", "Organisation", "Role", "Expertise",
                       "Education", "Experience",
@@ -473,9 +478,12 @@ elif st.session_state.step == STEP_PERSONAL:
     erv_opts = ["-- Select --","0-2 years","3-5 years","6-10 years","10+ years"]
     ervaring = st.selectbox("Years of relevant experience", erv_opts,
         index=erv_opts.index(p.get("ervaring","-- Select --")) if p.get("ervaring") in erv_opts else 0)
+    def clean(v, placeholder="-- Selecteer --"):
+        return "" if v == placeholder else v
     st.session_state.data["persoonlijk"] = {
         "naam":naam,"titel":titel,"organisatie":organisatie,
-        "rol":rol,"expertise":expertise,"opleiding":opleiding,"ervaring":ervaring}
+        "rol":clean(rol),"expertise":expertise,
+        "opleiding":clean(opleiding),"ervaring":clean(ervaring)}
     errors = []
     if not organisatie.strip():  errors.append("⚠️ Organisation is required.")
     if rol == "-- Select --":    errors.append("⚠️ Please select a role.")
@@ -680,15 +688,20 @@ elif st.session_state.step == STEP_SUMMARY:
     st.markdown("---")
     col1, col2 = st.columns(2)
     col1.button("← Previous", on_click=prev_step)
-    if col2.button("📨 Submit survey", type="primary"):
+    already_submitted = st.session_state.get("submitted", False)
+    if already_submitted:
+        st.success("✅ Your responses have been submitted. You can close this tab.")
+    elif col2.button("📨 Submit survey", type="primary"):
         with st.spinner("Saving responses..."):
             success = save_to_sheets(st.session_state.data)
         if success:
+            st.session_state.submitted = True
             clear_progress()
             st.session_state.step = STEP_THANKYOU
             st.rerun()
         else:
-            with st.expander("📋 Raw data (for development)", expanded=False):
+            st.error("❌ Something went wrong. Please try again or contact l.spijker@student.utwente.nl")
+            with st.expander("📋 Raw data (backup — copy this if needed)", expanded=True):
                 st.json(st.session_state.data)
 
 # ══════════════════════════════════════════════
