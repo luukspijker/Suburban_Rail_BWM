@@ -15,7 +15,7 @@ from datetime import datetime
 # ─────────────────────────────────────────────
 IMAGES = {
     "intro":        "factors_en_new.drawio.png",   # Sidebar image on welcome page
-    "categories":   "categories.drawio.png",        # Category selection + comparison pages
+    "categories":   "categories.png",        # Category selection + comparison pages
     "category_1":   "systemcharacteristics.drawio.png",        # System characteristics
     "category_2":   "integration.drawio.png",        # Integration with urban networks
     "category_3":   "userexperience.drawio.png",        # User experience
