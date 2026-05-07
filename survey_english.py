@@ -463,6 +463,7 @@ transport using the Best-Worst Method (BWM).
 - **Legal basis:** participation is voluntary and based on your consent (GDPR Art. 6(1)(a)).
 - **Right to withdraw:** you may withdraw your participation at any time and request
   deletion of your data by contacting **l.m.spijker@student.utwente.nl**.
+""")
     st.markdown("---")
     st.subheader("✅ Consent")
     st.markdown("Please tick both boxes below to proceed with the survey.")
