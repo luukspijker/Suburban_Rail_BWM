@@ -742,7 +742,7 @@ elif st.session_state.step == STEP_THANKYOU:
     st.balloons()
     st.markdown("""
 <div style="text-align:center;padding:3rem 1rem;">
-  <div style="font-size:4rem;margin-bottom:1rem;">🎉</div>
+  <div style="font-size:4rem;margin-bottom:1rem;"></div>
   <h1 style="color:#1e293b;">Thank you for your participation!</h1>
   <p style="font-size:1.1rem;color:#475569;max-width:500px;margin:1rem auto 2rem;">
     Your responses have been successfully saved and contribute to the research into
