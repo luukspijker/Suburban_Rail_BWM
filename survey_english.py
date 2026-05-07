@@ -751,7 +751,7 @@ elif st.session_state.step == STEP_THANKYOU:
   <hr style="border:none;border-top:1px solid #e2e8f0;margin:2rem 0;">
   <p style="color:#64748b;font-size:0.95rem;">
     Do you have any questions about the research? Please contact:<br>
-    <strong>📧 <a href="mailto:l.spijker@student.utwente.nl" style="color:#3b82f6;">
+    <strong><a href="mailto:l.m.spijker@student.utwente.nl" style="color:#3b82f6;">
     l.spijker@student.utwente.nl</a></strong>
   </p>
   <p style="color:#94a3b8;font-size:0.9rem;margin-top:2rem;">
