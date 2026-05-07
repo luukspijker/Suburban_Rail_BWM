@@ -459,12 +459,10 @@ transport using the Best-Worst Method (BWM).
 - **Access:** only the researcher (Luuk Spijker) and the supervising professor have
   access to the raw data.
 - **Retention:** all collected data will be deleted after completion and approval of
-  the research (no later than December 2025).
+  the research (no later than October 2026).
 - **Legal basis:** participation is voluntary and based on your consent (GDPR Art. 6(1)(a)).
 - **Right to withdraw:** you may withdraw your participation at any time and request
-  deletion of your data by contacting **l.spijker@student.utwente.nl**.
-- **Privacy statement:** see the [University of Twente privacy statement](https://www.utwente.nl/en/privacy/).
-""")
+  deletion of your data by contacting **l.m.spijker@student.utwente.nl**.
     st.markdown("---")
     st.subheader("✅ Consent")
     st.markdown("Please tick both boxes below to proceed with the survey.")
@@ -733,7 +731,7 @@ elif st.session_state.step == STEP_SUMMARY:
             st.session_state.step = STEP_THANKYOU
             st.rerun()
         else:
-            st.error("❌ Something went wrong. Please try again or contact l.spijker@student.utwente.nl")
+            st.error("❌ Something went wrong. Please try again or contact l.m.spijker@student.utwente.nl")
             with st.expander("📋 Raw data (backup — copy this if needed)", expanded=True):
                 st.json(st.session_state.data)
 
