@@ -14,7 +14,7 @@ from datetime import datetime
 # Place all images in the "images" subfolder next to this script
 # ─────────────────────────────────────────────
 IMAGES = {
-    "intro":        "intro_overview_en.png",   # Sidebar image on welcome page
+    "intro":        "factors_en_new.drawio.png",   # Sidebar image on welcome page
     "categories":   "categories.drawio.png",        # Category selection + comparison pages
     "category_1":   "systemcharacteristics.drawio.png",        # System characteristics
     "category_2":   "integration.drawio.png",        # Integration with urban networks
