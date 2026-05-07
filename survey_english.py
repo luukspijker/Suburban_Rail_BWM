@@ -9,6 +9,21 @@ import gspread
 from google.oauth2.service_account import Credentials
 from datetime import datetime
 
+# ─────────────────────────────────────────────
+# IMAGE FILENAMES — edit these to match your PNG files
+# Place all images in the "images" subfolder next to this script
+# ─────────────────────────────────────────────
+IMAGES = {
+    "intro":        "intro_overview_en.png",   # Sidebar image on welcome page
+    "categories":   "categories.drawio.png",        # Category selection + comparison pages
+    "category_1":   "systemcharacteristics.drawio.png",        # System characteristics
+    "category_2":   "integration.drawio.png",        # Integration with urban networks
+    "category_3":   "userexperience.drawio.png",        # User experience
+    "category_4":   "accessibility.drawio.png",        # Accessibility to stations
+    "category_5":   "landuse.drawio.png",        # Land use and spatial development
+}
+
+
 st.set_page_config(page_title="BWM Survey", layout="wide", page_icon="🚆")
 
 st.markdown("""
@@ -177,17 +192,10 @@ if "start_time" not in st.session_state:
 # PERSISTENCE
 # ─────────────────────────────────────────────
 def save_progress():
-    data_json = json.dumps(st.session_state.data, ensure_ascii=False)
-    tok = random.randint(0, 999999)
-    st.components.v1.html(
-        f"<script>/*{tok}*/try{{localStorage.setItem('bwm_data_en',{json.dumps(data_json)});"
-        f"localStorage.setItem('bwm_step_en','{st.session_state.step}');}}catch(e){{}}</script>",
-        height=0)
+    pass  # Data lives in st.session_state for the duration of the session
 
 def clear_progress():
-    st.components.v1.html(
-        "<script>try{localStorage.removeItem('bwm_data_en');"
-        "localStorage.removeItem('bwm_step_en');}catch(e){}</script>", height=0)
+    pass
 
 def save_to_sheets(data: dict):
     try:
@@ -237,8 +245,10 @@ def save_to_sheets(data: dict):
             for f in categories[cat]:
                 row.append(to_num(cd.get("others_to_worst", {}).get(f, "")))
 
-        existing = sheet.row_values(1) if sheet.row_count > 0 else []
-        if not existing:
+        # Get all non-empty rows to reliably detect if header exists
+        all_rows = sheet.get_all_values()
+        non_empty = [r for r in all_rows if any(c.strip() for c in r)]
+        if not non_empty:
             header = ["Respondent ID", "Timestamp", "Duration (min)", "Language",
                       "Name", "Title", "Organisation", "Role", "Expertise",
                       "Education", "Experience",
@@ -253,9 +263,9 @@ def save_to_sheets(data: dict):
                     header.append(f"{cat} BTO: {f}")
                 for f in categories[cat]:
                     header.append(f"{cat} OTW: {f}")
-            sheet.append_row(header)
+            sheet.append_row(header, value_input_option="RAW")
 
-        sheet.append_row(row)
+        sheet.append_row(row, value_input_option="RAW")
         return True
     except Exception as e:
         st.error(f"❌ Error saving to Google Sheets: {e}")
@@ -370,10 +380,26 @@ def compare_label(term_a, desc_a, term_b, desc_b):
         ' than <span class="tb">' + term_b + '</span>' + tip_b + '?</p>',
         unsafe_allow_html=True)
 
-def image_placeholder():
-    st.markdown(
-        '<div class="img-placeholder">📷 Overview figure of categories and factors will appear here</div>',
-        unsafe_allow_html=True)
+def show_page_image(key: str, sidebar: bool = False):
+    """
+    Display a PNG image by its key from the IMAGES dict above.
+    Images are loaded from the "images" subfolder next to this script.
+    """
+    from pathlib import Path
+    filename = IMAGES.get(key, "")
+    if not filename:
+        return
+    path = Path(__file__).parent / "images" / filename
+    if path.exists():
+        if sidebar:
+            with st.sidebar:
+                st.image(str(path), use_container_width=True)
+        else:
+            st.image(str(path), use_container_width=True)
+    else:
+        st.markdown(
+            f'<div class="img-placeholder">📷 Afbeelding niet gevonden: images/{filename}</div>',
+            unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────
 # PROGRESS BAR
@@ -383,12 +409,12 @@ if st.session_state.step < STEP_THANKYOU:
     st.progress(pct)
     st.caption(f"Progress: **{int(pct * 100)}%** completed")
     st.markdown("---")
-    image_placeholder()
 
 # ══════════════════════════════════════════════
 # STEP 1: INTRODUCTION
 # ══════════════════════════════════════════════
 if st.session_state.step == STEP_INTRO:
+    show_page_image("intro", sidebar=True)
     st.title("🚆 Success Factors for Suburban Rail Transport")
     st.subheader("Expert Survey — Best-Worst Method (BWM)")
     st.markdown("""
@@ -407,7 +433,6 @@ For each level you will be asked to:
 """)
     for cat, factors in categories.items():
         st.markdown(f"- **{cat}**: {', '.join(factors)}")
-    st.info("💾 Your progress is automatically saved in your browser.")
     st.button("Start survey →", on_click=next_step, type="primary")
 
 # ══════════════════════════════════════════════
@@ -496,6 +521,7 @@ elif st.session_state.step == STEP_PERSONAL:
 # ══════════════════════════════════════════════
 elif st.session_state.step == STEP_CAT_SELECT:
     st.title("Category comparison — Step 1 of 2")
+    show_page_image("categories")
     st.markdown("Select the category you consider **most** and **least important** for the success of suburban rail transport.")
 
     if "best_cat_sel" not in st.session_state:
@@ -503,6 +529,7 @@ elif st.session_state.step == STEP_CAT_SELECT:
         st.session_state["best_cat_sel"] = saved_bc if saved_bc in cat_list else None
 
     st.markdown("**⭐ Most important category**")
+    st.caption("_💡 Click an option to view its description._")
     best_cat = card_select(cat_list, "best_cat_sel", descriptions=category_descriptions)
     if best_cat:
         st.session_state.data["categorie_best"] = best_cat
@@ -516,6 +543,7 @@ elif st.session_state.step == STEP_CAT_SELECT:
         st.session_state["worst_cat_sel"] = None
 
     st.markdown("**⚪ Least important category**")
+    st.caption("_💡 Click an option to view its description._")
     worst_cat = card_select(remaining, "worst_cat_sel", descriptions=category_descriptions)
     if worst_cat:
         st.session_state.data["categorie_worst"] = worst_cat
@@ -536,6 +564,7 @@ elif st.session_state.step == STEP_CAT_CMP:
     best_cat  = st.session_state.data.get("categorie_best", cat_list[0])
     worst_cat = st.session_state.data.get("categorie_worst", cat_list[-1])
     st.title("Category comparison — Step 2 of 2")
+    show_page_image("categories")
 
     st.subheader(f"How much more important is '{best_cat}' than the other categories?")
     bto = st.session_state.data.get("categorie_best_to_others", {})
@@ -575,6 +604,7 @@ elif STEP_FACTOR_SEL_START <= st.session_state.step < STEP_SUMMARY:
 
     if page_type == 0:
         st.title(f"Category {cat_index + 1} of {N}: {cat}")
+        show_page_image(f"category_{cat_index + 1}")
         st.markdown(f"Select the **most** and **least important** factor within **{cat}**.")
 
         sel_key_b = f"best_f_sel_{cat}"
@@ -583,6 +613,7 @@ elif STEP_FACTOR_SEL_START <= st.session_state.step < STEP_SUMMARY:
             st.session_state[sel_key_b] = saved_b if saved_b in factors else None
 
         st.markdown("**⭐ Most important factor**")
+        st.caption("_💡 Click an option to view its description._")
         best_f = card_select(factors, sel_key_b, descriptions=factor_descriptions.get(cat,{}))
         st.session_state.data["factoren"][cat]["best"] = best_f
 
@@ -596,6 +627,7 @@ elif STEP_FACTOR_SEL_START <= st.session_state.step < STEP_SUMMARY:
             st.session_state[sel_key_w] = None
 
         st.markdown("**⚪ Least important factor**")
+        st.caption("_💡 Click an option to view its description._")
         worst_f = card_select(remaining_f, sel_key_w, descriptions=factor_descriptions.get(cat,{}))
         st.session_state.data["factoren"][cat]["worst"] = worst_f
 
@@ -614,6 +646,7 @@ elif STEP_FACTOR_SEL_START <= st.session_state.step < STEP_SUMMARY:
         worst_f  = cat_data.get("worst", factors[-1])
 
         st.title(f"Category {cat_index + 1} of {N}: {cat} — Comparisons")
+        show_page_image(f"category_{cat_index + 1}")
 
         st.subheader(f"How much more important is '{best_f}' than the other factors?")
         bto_f = cat_data.get("best_to_others", {})
