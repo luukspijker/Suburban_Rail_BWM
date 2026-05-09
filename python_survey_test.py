@@ -612,14 +612,9 @@ elif st.session_state.step == STEP_PERSONAL:
 # STEP 3: SELECTEER BESTE + SLECHTSTE CATEGORIE
 # ══════════════════════════════════════════════
 elif st.session_state.step == STEP_CAT_SELECT:
-    col_title, col_img = st.columns([3, 1])
-    with col_title:
-        st.title("Categorievergelijking — Stap 1 van 2")
-        st.markdown("Selecteer de categorie die u **het meest** en **het minst belangrijk** vindt.")
-    with col_img:
-        show_page_image("categories", width=220)
-        st.caption("Volledig overzicht:")
-        show_page_image("intro", width=220)
+    st.title("Categorievergelijking — Stap 1 van 2")
+    show_page_image("categories")
+    st.markdown("Selecteer de categorie die u **het meest** en **het minst belangrijk** vindt.")
 
     if "best_cat_sel" not in st.session_state:
         saved_bc = st.session_state.data.get("categorie_best", None)
@@ -662,13 +657,8 @@ elif st.session_state.step == STEP_CAT_SELECT:
 elif st.session_state.step == STEP_CAT_CMP:
     best_cat  = st.session_state.data.get("categorie_best", cat_list[0])
     worst_cat = st.session_state.data.get("categorie_worst", cat_list[-1])
-    col_title, col_img = st.columns([3, 1])
-    with col_title:
-        st.title("Categorievergelijking — Stap 2 van 2")
-    with col_img:
-        show_page_image("categories", width=220)
-        st.caption("Volledig overzicht:")
-        show_page_image("intro", width=220)
+    st.title("Categorievergelijking — Stap 2 van 2")
+    show_page_image("categories")
 
 
     st.subheader(f"Hoe veel belangrijker is '{best_cat}' dan de andere categorieën?")
@@ -712,12 +702,7 @@ elif STEP_FACTOR_SEL_START <= st.session_state.step < STEP_SUMMARY:
     if page_type == 0:
         # ── Pagina A: selecteer beste + slechtste factor ──
         st.title(f"Categorie {cat_index + 1} van {N}: {cat}")
-        col_fi, col_fo = st.columns(2)
-        with col_fi:
-            show_page_image(f"category_{cat_index + 1}")
-        with col_fo:
-            st.caption("Volledig overzicht:")
-            show_page_image("intro")
+        show_page_image(f"category_{cat_index + 1}")
         st.markdown(f"Selecteer de **meest** en **minst belangrijke** factor binnen **{cat}**.")
 
         sel_key_b = f"best_f_sel_{cat}"
@@ -760,12 +745,7 @@ elif STEP_FACTOR_SEL_START <= st.session_state.step < STEP_SUMMARY:
         worst_f  = cat_data.get("worst", factors[-1])
 
         st.title(f"Categorie {cat_index + 1} van {N}: {cat} — Vergelijkingen")
-        col_fi, col_fo = st.columns(2)
-        with col_fi:
-            show_page_image(f"category_{cat_index + 1}")
-        with col_fo:
-            st.caption("Volledig overzicht:")
-            show_page_image("intro")
+        show_page_image(f"category_{cat_index + 1}")
 
         st.subheader(f"Hoe veel belangrijker is '{best_f}' dan de andere factoren?")
         bto_f = cat_data.get("best_to_others", {})
