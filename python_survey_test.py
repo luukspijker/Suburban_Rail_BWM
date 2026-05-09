@@ -461,7 +461,15 @@ def show_page_image(key: str, width: int = None):
     path = Path(__file__).parent / "images_nl" / filename
     if path.exists():
         if width:
-            st.image(str(path), width=width)
+            # Wrap in a div with left margin to nudge image right
+            import base64
+            with open(str(path), "rb") as img_file:
+                b64 = base64.b64encode(img_file.read()).decode()
+            st.markdown(
+                f'<div style="margin-left:20px;">' +
+                f'<img src="data:image/png;base64,{b64}" width="{width}" style="max-width:100%;">' +
+                f'</div>',
+                unsafe_allow_html=True)
         else:
             st.image(str(path), use_container_width=True)
     else:
@@ -510,7 +518,9 @@ Per niveau wordt u gevraagd:
             st.markdown(f"- **{cat}**: {', '.join(factors)}")
         st.button("Start enquête →", on_click=next_step, type="primary")
     with col_img:
+        st.markdown('<div style="margin-left:16px;">', unsafe_allow_html=True)
         show_page_image("intro")
+        st.markdown('</div>', unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════
 # STEP 2: TOESTEMMING (GDPR CONSENT)
@@ -612,9 +622,12 @@ elif st.session_state.step == STEP_PERSONAL:
 # STEP 3: SELECTEER BESTE + SLECHTSTE CATEGORIE
 # ══════════════════════════════════════════════
 elif st.session_state.step == STEP_CAT_SELECT:
-    st.title("Categorievergelijking — Stap 1 van 2")
-    show_page_image("categories")
-    st.markdown("Selecteer de categorie die u **het meest** en **het minst belangrijk** vindt.")
+    col_left, col_right = st.columns([3, 1])
+    with col_left:
+        st.title("Categorievergelijking — Stap 1 van 2")
+        st.markdown("Selecteer de categorie die u **het meest** en **het minst belangrijk** vindt.")
+    with col_right:
+        show_page_image("intro", width=160)
 
     if "best_cat_sel" not in st.session_state:
         saved_bc = st.session_state.data.get("categorie_best", None)
@@ -657,8 +670,11 @@ elif st.session_state.step == STEP_CAT_SELECT:
 elif st.session_state.step == STEP_CAT_CMP:
     best_cat  = st.session_state.data.get("categorie_best", cat_list[0])
     worst_cat = st.session_state.data.get("categorie_worst", cat_list[-1])
-    st.title("Categorievergelijking — Stap 2 van 2")
-    show_page_image("categories")
+    col_left, col_right = st.columns([3, 1])
+    with col_left:
+        st.title("Categorievergelijking — Stap 2 van 2")
+    with col_right:
+        show_page_image("intro", width=160)
 
 
     st.subheader(f"Hoe veel belangrijker is '{best_cat}' dan de andere categorieën?")
