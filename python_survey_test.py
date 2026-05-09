@@ -9,6 +9,21 @@ import gspread
 from google.oauth2.service_account import Credentials
 from datetime import datetime
 
+# ─────────────────────────────────────────────
+# AFBEELDINGEN — pas deze namen aan naar uw PNG-bestanden
+# Plaats alle afbeeldingen in de submap "images" naast dit script
+# ─────────────────────────────────────────────
+IMAGES = {
+    "intro":        "factors_nl.drawio.png",   # Zijbalkafbeelding op welkomstpagina
+    "categories":   "categorieen.drawio.png",        # Categorie selectie + vergelijkingspagina's
+    "category_1":   "dienstkenmerken.drawio.png",        # Dienstkenmerken
+    "category_2":   "gebruikerservaring.drawio.png",        # Gebruikerservaring
+    "category_3":   "integratie.drawio.png",        # Integratie in stedelijke netwerken
+    "category_4":   "bereikbaarheid.drawio.png",        # Bereikbaarheid van stations
+    "category_5":   "ruimtelijke.drawio.png",        # Ruimtelijke ontwikkeling bij stations
+}
+
+
 st.set_page_config(page_title="BWM Enquête", layout="wide", page_icon="🚆")
 
 st.markdown("""
@@ -94,52 +109,62 @@ st.markdown("""
 # DATA
 # ─────────────────────────────────────────────
 category_descriptions = {
-    "Service- en systeemkenmerken":
-        "De operationele prestaties van het spoorsysteem zoals frequentie, snelheid, beschikbaarheid en betrouwbaarheid.",
-    "Netwerkontwerp en integratie":
-        "De structurele opzet van het spoornetwerk en de mate waarin dit fysiek en operationeel is geïntegreerd met andere vervoersmodaliteiten.",
-    "Gebruikerservaring en kwaliteit":
-        "De ervaren kwaliteit van het systeem vanuit het perspectief van de reiziger, inclusief comfort, gebruiksgemak en systeemimago.",
+    "Dienstkenmerken":
+        "Factoren die betrekking hebben op de operationele prestaties en het serviceniveau van het vervoerssysteem.",
+    "Gebruikerservaring":
+        "Factoren die betrekking hebben op de kwaliteit, eenvoud en aantrekkelijkheid van de reiservaring voor gebruikers.",
+    "Integratie in stedelijke netwerken":
+        "Factoren die betrekking hebben op de mate waarin het systeem ruimtelijk, operationeel en functioneel is geïntegreerd met stedelijke vervoersnetwerken.",
     "Bereikbaarheid van stations":
-        "De mate waarin stations eenvoudig bereikbaar zijn met verschillende vervoerswijzen.",
-    "Ruimtelijke ontwikkeling":
-        "De ruimtelijke spreiding en intensiteit van functies rondom stations en de afstemming tussen ruimtegebruik en vervoer.",
-    "Governance en implementatie":
-        "De institutionele en organisatorische context die de coördinatie, besluitvorming en uitvoering van het spoorsysteem mogelijk maakt.",
+        "Factoren die betrekking hebben op de toegankelijkheid van stations en de eenvoud waarmee reizigers het netwerk kunnen bereiken.",
+    "Ruimtelijke ontwikkeling bij stations":
+        "Factoren die betrekking hebben op de ruimtelijke structuur en ontwikkeling rondom stations en corridors.",
 }
 
 factor_descriptions = {
-    "Service- en systeemkenmerken": {
-        "Dienstfrequentie": "De mate waarin hoge frequenties de wachttijd verkorten en de flexibiliteit en aantrekkelijkheid van het systeem vergroten.",
-        "Reissnelheid": "De mate waarin het systeem korte reistijden tussen herkomsten en bestemmingen mogelijk maakt, onder andere door hoge rijsnelheden.",
-        "Beschikbaarheid": "De mate waarin de dienst beschikbaar is gedurende de dag en week, zoals laat in de avond en weekenden.",
-        "Betrouwbaarheid": "De mate waarin reistijden en dienstuitvoering punctueel, consistent en voorspelbaar zijn, en het systeem in staat is verstoringen op te vangen en ervan te herstellen.",
+    "Dienstkenmerken": {
+        "Bedieningsperiode":
+            "De mate waarin de dienst beschikbaar is gedurende de dag en week, zoals laat in de avond en weekenden.",
+        "Betrouwbaarheid":
+            "De mate waarin reistijden en diensten punctueel, consistent en voorspelbaar zijn.",
+        "Dienstfrequentie":
+            "De mate waarin hoge en regelmatige frequenties worden aangeboden.",
+        "Reistijd":
+            "De mate waarin het systeem korte reistijden mogelijk maakt, onder andere door korte halteertijden.",
+        "Tariefniveau":
+            "De mate waarin tarieven concurrerend en betaalbaar zijn.",
     },
-    "Netwerkontwerp en integratie": {
-        "Doorkoppeling": "De mate waarin diensten door stadscentra rijden en meerdere corridors met elkaar verbinden zonder dat overstappen nodig zijn.",
-        "Afstemming van dienstregelingen en overstappen": "De mate waarin dienstregelingen en overstappen op elkaar zijn afgestemd om naadloze multimodale reizen mogelijk te maken, onafhankelijk van de frequentie.",
-        "Ontvlechting van infrastructuur": "De mate waarin het systeem gebruikmaakt van eigen, gescheiden infrastructuur, waardoor interferentie met ander spoor- of wegverkeer wordt geminimaliseerd.",
-        "Tarief- en ticketintegratie": "De mate waarin tarieven en ticketsystemen zijn geïntegreerd over modaliteiten en vervoerders, zodat drempelloos reizen mogelijk is.",
+    "Gebruikerservaring": {
+        "Comfort":
+            "De mate waarin een comfortabele en aangename reiservaring wordt geboden, inclusief capaciteit, netheid en sociale veiligheid.",
+        "Reisinformatie":
+            "De mate waarin duidelijke en actuele reisinformatie beschikbaar is online en op stations, en waarin navigeren op stations eenvoudig is.",
+        "Systeemidentiteit":
+            "De mate waarin voertuigen en stations een duidelijke, herkenbare en aantrekkelijke identiteit hebben die het onderscheidt van andere OV-diensten.",
     },
-    "Gebruikerservaring en kwaliteit": {
-        "Operationele prestaties van materieel": "De mate waarin het ontwerp van voertuigen efficiënte exploitatie ondersteunt, waaronder snel afremmen en optrekken, hoge capaciteit, gelijkvloerse instap en deurconfiguratie.",
-        "Systeemidentiteit en uitstraling": "De mate waarin het systeem een duidelijke, herkenbare en aantrekkelijke identiteit heeft die het onderscheidt van andere OV-diensten.",
-        "Reizigerscomfort en gebruiksgemak": "De algehele reizigerservaring, inclusief comfort, duidelijke en actuele reisinformatie en het gemak van het navigeren en gebruiken van het systeem.",
+    "Integratie in stedelijke netwerken": {
+        "Doorkoppeling in stedelijke gebieden":
+            "De mate waarin diensten door stedelijke gebieden worden doorgekoppeld en meerdere stedelijke corridors direct verbinden zonder overstappen.",
+        "Overstapintegratie met BTM":
+            "De mate waarin dienstregelingen en fysieke overstappen op BTM op elkaar zijn afgestemd om soepele multimodale reizen mogelijk te maken.",
+        "Tarief- en ticketintegratie met BTM":
+            "De mate waarin tarieven en ticketsystemen zijn geïntegreerd over modaliteiten en vervoerders, zodat drempelloos reizen mogelijk is.",
     },
     "Bereikbaarheid van stations": {
-        "Stationsdichtheid en -spreiding": "De mate waarin stations voldoende dicht en ruimtelijk goed verspreid zijn om brede toegang tot het netwerk te bieden.",
-        "Loop- en fietsbereikbaarheid van stations": "De mate waarin stations goed bereikbaar zijn te voet en per fiets, inclusief de beschikbaarheid van voldoende stallingen.",
-        "Autobereikbaarheid van stations": "De mate waarin stations parkeervoorzieningen bieden om de overstap van auto naar trein te faciliteren.",
+        "Loop- en fietsbereikbaarheid van stations":
+            "De mate waarin stations goed bereikbaar zijn te voet en per fiets, inclusief de beschikbaarheid van voldoende stallingen.",
+        "Parkeervoorzieningen bij stations (P+R)":
+            "De mate waarin bepaalde stations parkeervoorzieningen bieden om de overstap van auto naar trein te faciliteren.",
+        "Stationsdichtheid":
+            "De mate waarin stations voldoende dicht en ruimtelijk evenwichtig zijn verspreid om brede toegang tot het netwerk te bieden.",
     },
-    "Ruimtelijke ontwikkeling": {
-        "Dichtheid van herkomsten en bestemmingen": "De mate waarin bevolking en activiteiten geconcentreerd zijn rond stations en langs corridors.",
-        "Afstemming tussen ruimtelijke ontwikkeling en vervoersinvesteringen": "De mate waarin ruimtelijke ontwikkeling en transportinfrastructuur in tijd, locatie en schaal op elkaar zijn afgestemd en elkaar versterken.",
-        "Diversiteit van bestemmingen rond stations": "De mate waarin een mix van functies zoals werkgelegenheid, onderwijs, detailhandel en recreatie aanwezig is in stationsgebieden, waardoor meerdere reismotieven worden ondersteund.",
-    },
-    "Governance en implementatie": {
-        "Samenwerking tussen vervoersorganisaties": "De mate van samenwerking tussen vervoerders en overheden bij planning, exploitatie en integratie van diensten.",
-        "Rol van regionale overheden": "De mate waarin regionale of stedelijke overheden, ten opzichte van nationale overheden, regie voeren over ontwerp, financiering en integratie van het systeem.",
-        "Institutionele integratie van mobiliteit en ruimtelijke ordening": "De mate waarin vervoersautoriteiten en ruimtelijke planners gezamenlijke besluitvorming, verantwoordelijkheden en langetermijnstrategieën delen om samenhangende uitkomsten te realiseren.",
+    "Ruimtelijke ontwikkeling bij stations": {
+        "Coördinatie ruimte en mobiliteit":
+            "De mate waarin ruimtelijke ontwikkeling en het vervoerssysteem op elkaar zijn afgestemd in locatie, functie en ontwikkeling.",
+        "Dichtheid rond stations":
+            "De mate waarin bevolking en activiteiten geconcentreerd zijn in de omgeving van stations.",
+        "Functiemix rond stations":
+            "De mate waarin verschillende functies (zoals wonen, werken, onderwijs en voorzieningen) aanwezig zijn in stationsgebieden om verschillende reismotieven te ondersteunen.",
     },
 }
 
@@ -199,17 +224,10 @@ if "start_time" not in st.session_state:
 # PERSISTENCE
 # ─────────────────────────────────────────────
 def save_progress():
-    data_json = json.dumps(st.session_state.data, ensure_ascii=False)
-    tok = random.randint(0, 999999)
-    st.components.v1.html(
-        f"<script>/*{tok}*/try{{localStorage.setItem('bwm_data',{json.dumps(data_json)});"
-        f"localStorage.setItem('bwm_step','{st.session_state.step}');}}catch(e){{}}</script>",
-        height=0)
+    pass  # Data lives in st.session_state for the duration of the session
 
 def clear_progress():
-    st.components.v1.html(
-        "<script>try{localStorage.removeItem('bwm_data');"
-        "localStorage.removeItem('bwm_step');}catch(e){}</script>", height=0)
+    pass
 
 # ─────────────────────────────────────────────
 # GOOGLE SHEETS EXPORT
@@ -262,13 +280,17 @@ def save_to_sheets(data: dict):
             data.get("opmerkingen", ""),
         ]
 
-        # Category bto values
-        for cat in cat_list:
-            row.append(bto.get(cat, ""))
+        def to_num(label):
+            """Convert linguistic scale label to numeric value."""
+            return scale.get(label, label) if label else ""
 
-        # Category otw values
+        # Category bto values (numeric)
         for cat in cat_list:
-            row.append(otw.get(cat, ""))
+            row.append(to_num(bto.get(cat, "")))
+
+        # Category otw values (numeric)
+        for cat in cat_list:
+            row.append(to_num(otw.get(cat, "")))
 
         # Factor best, worst, bto, otw per category
         for cat in cat_list:
@@ -276,12 +298,15 @@ def save_to_sheets(data: dict):
             row.append(cd.get("best", ""))
             row.append(cd.get("worst", ""))
             for f in categories[cat]:
-                row.append(cd.get("best_to_others", {}).get(f, ""))
+                row.append(to_num(cd.get("best_to_others", {}).get(f, "")))
             for f in categories[cat]:
-                row.append(cd.get("others_to_worst", {}).get(f, ""))
+                row.append(to_num(cd.get("others_to_worst", {}).get(f, "")))
 
         # Write header row if sheet is empty
-        if sheet.row_count == 0 or not sheet.row_values(1):
+        # Get all non-empty rows to reliably detect if header exists
+        all_rows = sheet.get_all_values()
+        non_empty = [r for r in all_rows if any(c.strip() for c in r)]
+        if not non_empty:
             header = [
                 "Respondent ID", "Timestamp", "Duur (min)",
                 "Naam", "Titel", "Organisatie", "Rol",
@@ -298,13 +323,12 @@ def save_to_sheets(data: dict):
                     header.append(f"{cat} BTO: {f}")
                 for f in categories[cat]:
                     header.append(f"{cat} OTW: {f}")
-            sheet.append_row(header)
+            sheet.append_row(header, value_input_option="RAW")
 
-        sheet.append_row(row)
+        sheet.append_row(row, value_input_option="RAW")
         return True
 
     except Exception as e:
-        st.error(f"❌ Fout bij opslaan naar Google Sheets: {e}")
         return False
 
 # ─────────────────────────────────────────────
@@ -407,8 +431,6 @@ def card_select(options, state_key, descriptions=None):
             f'font-size:0.85rem;color:#1e3a5f;line-height:1.5;">'
             f'<strong>{current}:</strong> {descriptions[current]}</div>',
             unsafe_allow_html=True)
-    elif not current:
-        st.caption("👆 Klik op een optie om de omschrijving te zien.")
     st.markdown("")
     return current
 
@@ -427,10 +449,25 @@ def compare_label(term_a, desc_a, term_b, desc_b):
         ' dan <span class="tb">' + term_b + '</span>' + tip_b + '?</p>',
         unsafe_allow_html=True)
 
-def image_placeholder():
-    st.markdown(
-        '<div class="img-placeholder">📷 Hier komt een afbeelding van de categorieën en factoren</div>',
-        unsafe_allow_html=True)
+def show_page_image(key: str, width: int = None):
+    """
+    Display a PNG from the IMAGES dict. Images live in the 'images' subfolder.
+    width: optional pixel width to constrain the image (e.g. 300 for smaller).
+    """
+    from pathlib import Path
+    filename = IMAGES.get(key, "")
+    if not filename:
+        return
+    path = Path(__file__).parent / "images" / filename
+    if path.exists():
+        if width:
+            st.image(str(path), width=width)
+        else:
+            st.image(str(path), use_container_width=True)
+    else:
+        st.markdown(
+            f'<div class="img-placeholder">📷 Afbeelding niet gevonden: images/{filename}</div>',
+            unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────
 # PROGRESS BAR + IMAGE PLACEHOLDER
@@ -440,7 +477,6 @@ if st.session_state.step < STEP_THANKYOU:
     st.progress(pct)
     st.caption(f"Voortgang: **{int(pct * 100)}%** voltooid")
     st.markdown("---")
-    image_placeholder()
 
 # ══════════════════════════════════════════════
 # STEP 1: INTRODUCTIE
@@ -448,22 +484,33 @@ if st.session_state.step < STEP_THANKYOU:
 if st.session_state.step == STEP_INTRO:
     st.title("🚆 Succesfactoren voor Voorstedelijk Spoorvervoer")
     st.subheader("Expertenquête — Best-Worst Methode (BWM)")
-    st.markdown("""
-**Welkom bij dit onderzoek.** U wordt gevraagd uw expertise in te zetten om de
-relatieve belangrijkheid van factoren te beoordelen via de Best-Worst Methode.
+    col_text, col_img = st.columns([3, 1])
+    with col_text:
+        st.markdown("""
+**Welkom bij deze expertenquête.** Dit onderzoek richt zich op het identificeren van
+factoren die bijdragen aan het potentiële vraagstucces van voorstedelijk spoorvervoer
+in de Nederlandse context. De uitkomsten bieden een raamwerk voor besluitvorming over
+de implementatie van dergelijke diensten in Nederland, en worden gebruikt als invoer
+voor een modelleringsstudie.
 
 ### Werkwijze
-1. De **meest belangrijke** factor/categorie aanwijzen
-2. De **minst belangrijke** factor/categorie aanwijzen
-3. **Best-to-others**: hoeveel belangrijker is de beste dan alle anderen?
-4. **Others-to-worst**: hoeveel belangrijker is elke andere dan de slechtste?
+Het onderzoek is opgebouwd in twee niveaus:
+
+- **Niveau 1 — Categorieën:** Eerst worden de vijf hoofdcategorieën ten opzichte van elkaar gerangschikt.
+- **Niveau 2 — Factoren:** Vervolgens worden per categorie de factoren ten opzichte van elkaar gerangschikt.
+
+Per niveau wordt u gevraagd:
+1. De **meest belangrijke** en **minst belangrijke** factor of categorie aan te wijzen
+2. **Best-to-others**: hoeveel belangrijker is de beste dan alle anderen?
+3. **Others-to-worst**: hoeveel belangrijker is elke andere dan de slechtste?
 
 ### Categorieën & factoren
 """)
-    for cat, factors in categories.items():
-        st.markdown(f"- **{cat}**: {', '.join(factors)}")
-    st.info("💾 Uw voortgang wordt automatisch opgeslagen in uw browser.")
-    st.button("Start enquête →", on_click=next_step, type="primary")
+        for cat, factors in categories.items():
+            st.markdown(f"- **{cat}**: {', '.join(factors)}")
+        st.button("Start enquête →", on_click=next_step, type="primary")
+    with col_img:
+        show_page_image("intro")
 
 # ══════════════════════════════════════════════
 # STEP 2: TOESTEMMING (GDPR CONSENT)
@@ -539,9 +586,12 @@ elif st.session_state.step == STEP_PERSONAL:
     erv_opts = ["-- Selecteer --","0-2 jaar","3-5 jaar","6-10 jaar","10+ jaar"]
     ervaring = st.selectbox("Aantal jaar relevante ervaring", erv_opts,
         index=erv_opts.index(p.get("ervaring","-- Selecteer --")) if p.get("ervaring") in erv_opts else 0)
+    def clean(v, placeholder="-- Selecteer --"):
+        return "" if v == placeholder else v
     st.session_state.data["persoonlijk"] = {
         "naam":naam,"titel":titel,"organisatie":organisatie,
-        "rol":rol,"expertise":expertise,"opleiding":opleiding,"ervaring":ervaring}
+        "rol":clean(rol),"expertise":expertise,
+        "opleiding":clean(opleiding),"ervaring":clean(ervaring)}
     errors = []
     if not organisatie.strip():  errors.append("⚠️ Organisatie is verplicht.")
     if rol == "-- Selecteer --": errors.append("⚠️ Selecteer een rol.")
@@ -562,14 +612,19 @@ elif st.session_state.step == STEP_PERSONAL:
 # STEP 3: SELECTEER BESTE + SLECHTSTE CATEGORIE
 # ══════════════════════════════════════════════
 elif st.session_state.step == STEP_CAT_SELECT:
-    st.title("Categorievergelijking — Stap 1 van 2")
-    st.markdown("Selecteer de categorie die u **het meest** en **het minst belangrijk** vindt.")
+    col_title, col_img = st.columns([3, 1])
+    with col_title:
+        st.title("Categorievergelijking — Stap 1 van 2")
+        st.markdown("Selecteer de categorie die u **het meest** en **het minst belangrijk** vindt.")
+    with col_img:
+        show_page_image("categories", width=220)
 
     if "best_cat_sel" not in st.session_state:
         saved_bc = st.session_state.data.get("categorie_best", None)
         st.session_state["best_cat_sel"] = saved_bc if saved_bc in cat_list else None
 
     st.markdown("**⭐ Meest belangrijke categorie**")
+    st.caption("_💡 Klik op een optie om de omschrijving te bekijken._")
     best_cat = card_select(cat_list, "best_cat_sel", descriptions=category_descriptions)
     if best_cat:
         st.session_state.data["categorie_best"] = best_cat
@@ -583,6 +638,7 @@ elif st.session_state.step == STEP_CAT_SELECT:
         st.session_state["worst_cat_sel"] = None
 
     st.markdown("**⚪ Minst belangrijke categorie**")
+    st.caption("_💡 Klik op een optie om de omschrijving te bekijken._")
     worst_cat = card_select(remaining, "worst_cat_sel", descriptions=category_descriptions)
     if worst_cat:
         st.session_state.data["categorie_worst"] = worst_cat
@@ -604,8 +660,12 @@ elif st.session_state.step == STEP_CAT_SELECT:
 elif st.session_state.step == STEP_CAT_CMP:
     best_cat  = st.session_state.data.get("categorie_best", cat_list[0])
     worst_cat = st.session_state.data.get("categorie_worst", cat_list[-1])
+    col_title, col_img = st.columns([3, 1])
+    with col_title:
+        st.title("Categorievergelijking — Stap 2 van 2")
+    with col_img:
+        show_page_image("categories", width=220)
 
-    st.title("Categorievergelijking — Stap 2 van 2")
 
     st.subheader(f"Hoe veel belangrijker is '{best_cat}' dan de andere categorieën?")
     bto = st.session_state.data.get("categorie_best_to_others", {})
@@ -648,6 +708,7 @@ elif STEP_FACTOR_SEL_START <= st.session_state.step < STEP_SUMMARY:
     if page_type == 0:
         # ── Pagina A: selecteer beste + slechtste factor ──
         st.title(f"Categorie {cat_index + 1} van {N}: {cat}")
+        show_page_image(f"category_{cat_index + 1}")
         st.markdown(f"Selecteer de **meest** en **minst belangrijke** factor binnen **{cat}**.")
 
         sel_key_b = f"best_f_sel_{cat}"
@@ -656,6 +717,7 @@ elif STEP_FACTOR_SEL_START <= st.session_state.step < STEP_SUMMARY:
             st.session_state[sel_key_b] = saved_b if saved_b in factors else None
 
         st.markdown("**⭐ Meest belangrijke factor**")
+        st.caption("_💡 Klik op een optie om de omschrijving te bekijken._")
         best_f = card_select(factors, sel_key_b, descriptions=factor_descriptions.get(cat, {}))
         st.session_state.data["factoren"][cat]["best"] = best_f
 
@@ -667,6 +729,7 @@ elif STEP_FACTOR_SEL_START <= st.session_state.step < STEP_SUMMARY:
             st.session_state[sel_key_w] = saved_w if saved_w in remaining_f else None
 
         st.markdown("**⚪ Minst belangrijke factor**")
+        st.caption("_💡 Klik op een optie om de omschrijving te bekijken._")
         worst_f = card_select(remaining_f, sel_key_w, descriptions=factor_descriptions.get(cat, {}))
         st.session_state.data["factoren"][cat]["worst"] = worst_f
 
@@ -688,6 +751,7 @@ elif STEP_FACTOR_SEL_START <= st.session_state.step < STEP_SUMMARY:
         worst_f  = cat_data.get("worst", factors[-1])
 
         st.title(f"Categorie {cat_index + 1} van {N}: {cat} — Vergelijkingen")
+        show_page_image(f"category_{cat_index + 1}")
 
         st.subheader(f"Hoe veel belangrijker is '{best_f}' dan de andere factoren?")
         bto_f = cat_data.get("best_to_others", {})
@@ -763,15 +827,20 @@ elif st.session_state.step == STEP_SUMMARY:
     st.markdown("---")
     col1, col2 = st.columns(2)
     col1.button("← Vorige", on_click=prev_step)
-    if col2.button("📨 Verzend enquête", type="primary"):
+    already_submitted = st.session_state.get("submitted", False)
+    if already_submitted:
+        st.success("✅ Uw antwoorden zijn al verzonden. U kunt dit tabblad sluiten.")
+    elif col2.button("📨 Verzend enquête", type="primary"):
         with st.spinner("Antwoorden opslaan..."):
             success = save_to_sheets(st.session_state.data)
         if success:
+            st.session_state.submitted = True
             clear_progress()
             st.session_state.step = STEP_THANKYOU
             st.rerun()
         else:
-            with st.expander("📋 Ruwe data (voor ontwikkeling)", expanded=False):
+            st.error("❌ Er is iets misgegaan. Probeer opnieuw of neem contact op via l.spijker@student.utwente.nl")
+            with st.expander("📋 Ruwe data (backup — kopieer dit indien nodig)", expanded=True):
                 st.json(st.session_state.data)
 
 # ══════════════════════════════════════════════
