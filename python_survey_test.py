@@ -14,13 +14,13 @@ from datetime import datetime
 # Plaats alle afbeeldingen in de submap "images" naast dit script
 # ─────────────────────────────────────────────
 IMAGES = {
-    "intro":        "factors_nl.drawio.png",   # Zijbalkafbeelding op welkomstpagina
-    "categories":   "categorieen.drawio.png",        # Categorie selectie + vergelijkingspagina's
-    "category_1":   "dienstkenmerken.drawio.png",        # Dienstkenmerken
-    "category_2":   "gebruikerservaring.drawio.png",        # Gebruikerservaring
+    "intro":        "factors_nl.drawio.png",       # Welkomstpagina — volledig overzicht
+    "categories":   "categorieen.drawio.png",       # Categorie selectie + vergelijkingspagina's
+    "category_1":   "dienstkenmerken.drawio.png",   # Dienstkenmerken
+    "category_2":   "gebruikerservaring.drawio.png", # Gebruikerservaring
     "category_3":   "integratie.drawio.png",        # Integratie in stedelijke netwerken
-    "category_4":   "bereikbaarheid.drawio.png",        # Bereikbaarheid van stations
-    "category_5":   "ruimtelijke.drawio.png",        # Ruimtelijke ontwikkeling bij stations
+    "category_4":   "bereikbaarheid.drawio.png",    # Bereikbaarheid van stations
+    "category_5":   "ruimtelijke.drawio.png",       # Ruimtelijke ontwikkeling bij stations
 }
 
 
@@ -484,7 +484,7 @@ if st.session_state.step < STEP_THANKYOU:
 if st.session_state.step == STEP_INTRO:
     st.title("🚆 Succesfactoren voor Voorstedelijk Spoorvervoer")
     st.subheader("Expertenquête — Best-Worst Methode (BWM)")
-    col_text, col_img = st.columns([3, 1])
+    col_text, col_img = st.columns([1, 1])
     with col_text:
         st.markdown("""
 **Welkom bij deze expertenquête.** Dit onderzoek richt zich op het identificeren van
@@ -618,6 +618,8 @@ elif st.session_state.step == STEP_CAT_SELECT:
         st.markdown("Selecteer de categorie die u **het meest** en **het minst belangrijk** vindt.")
     with col_img:
         show_page_image("categories", width=220)
+        st.caption("Volledig overzicht:")
+        show_page_image("intro", width=220)
 
     if "best_cat_sel" not in st.session_state:
         saved_bc = st.session_state.data.get("categorie_best", None)
@@ -665,6 +667,8 @@ elif st.session_state.step == STEP_CAT_CMP:
         st.title("Categorievergelijking — Stap 2 van 2")
     with col_img:
         show_page_image("categories", width=220)
+        st.caption("Volledig overzicht:")
+        show_page_image("intro", width=220)
 
 
     st.subheader(f"Hoe veel belangrijker is '{best_cat}' dan de andere categorieën?")
@@ -708,7 +712,12 @@ elif STEP_FACTOR_SEL_START <= st.session_state.step < STEP_SUMMARY:
     if page_type == 0:
         # ── Pagina A: selecteer beste + slechtste factor ──
         st.title(f"Categorie {cat_index + 1} van {N}: {cat}")
-        show_page_image(f"category_{cat_index + 1}")
+        col_fi, col_fo = st.columns(2)
+        with col_fi:
+            show_page_image(f"category_{cat_index + 1}")
+        with col_fo:
+            st.caption("Volledig overzicht:")
+            show_page_image("intro")
         st.markdown(f"Selecteer de **meest** en **minst belangrijke** factor binnen **{cat}**.")
 
         sel_key_b = f"best_f_sel_{cat}"
@@ -751,7 +760,12 @@ elif STEP_FACTOR_SEL_START <= st.session_state.step < STEP_SUMMARY:
         worst_f  = cat_data.get("worst", factors[-1])
 
         st.title(f"Categorie {cat_index + 1} van {N}: {cat} — Vergelijkingen")
-        show_page_image(f"category_{cat_index + 1}")
+        col_fi, col_fo = st.columns(2)
+        with col_fi:
+            show_page_image(f"category_{cat_index + 1}")
+        with col_fo:
+            st.caption("Volledig overzicht:")
+            show_page_image("intro")
 
         st.subheader(f"Hoe veel belangrijker is '{best_f}' dan de andere factoren?")
         bto_f = cat_data.get("best_to_others", {})
