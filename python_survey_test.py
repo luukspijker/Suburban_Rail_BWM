@@ -458,7 +458,7 @@ def show_page_image(key: str, width: int = None):
     filename = IMAGES.get(key, "")
     if not filename:
         return
-    path = Path(__file__).parent / "images" / filename
+    path = Path(__file__).parent / "images_nl" / filename
     if path.exists():
         if width:
             st.image(str(path), width=width)
