@@ -515,25 +515,22 @@ if st.session_state.step < STEP_THANKYOU:
 # STEP 1: INTRODUCTIE
 # ══════════════════════════════════════════════
 if st.session_state.step == STEP_INTRO:
-    st.title("🚆 Succesfactoren voor Voorstedelijk Spoorvervoer")
-    st.subheader("Expertenquête — Best-Worst Methode (BWM)")
-
-    # Build category+factor list as HTML
     cat_list_html = "".join(
         f"<li><strong>{cat}</strong>: {', '.join(factors)}</li>"
         for cat, factors in categories.items()
     )
-
     intro_b64 = _img_b64("intro")
     img_tag = (
         f'<img src="data:image/png;base64,{intro_b64}" ' +
-        'width="320" style="float:right;margin-left:24px;margin-bottom:12px;">' 
+        'style="float:right;margin-left:28px;margin-bottom:16px;width:45%;max-width:420px;">' 
         if intro_b64 else ""
     )
-
     st.markdown(f"""
 <div style="overflow:hidden;">
 {img_tag}
+<h1>🚆 Succesfactoren voor Voorstedelijk Spoorvervoer</h1>
+<h2>Expertenquête — Best-Worst Methode (BWM)</h2>
+
 <p><strong>Welkom bij deze expertenquête.</strong> Dit onderzoek richt zich op het
 identificeren van factoren die bijdragen aan het potentiële vraagstucces van
 voorstedelijk spoorvervoer in de Nederlandse context. De uitkomsten bieden een raamwerk
