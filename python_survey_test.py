@@ -449,8 +449,8 @@ def compare_label(term_a, desc_a, term_b, desc_b):
         ' dan <span class="tb">' + term_b + '</span>' + tip_b + '?</p>',
         unsafe_allow_html=True)
 
-def _float_image_html(key: str, width: int = 280) -> str:
-    """Return HTML that floats an image to the right so text flows beside it."""
+def _img_b64(key: str) -> str:
+    """Return base64 data URI for an image key, or empty string if not found."""
     from pathlib import Path
     import base64
     filename = IMAGES.get(key, "")
@@ -458,13 +458,19 @@ def _float_image_html(key: str, width: int = 280) -> str:
         return ""
     path = Path(__file__).parent / "images_nl" / filename
     if not path.exists():
-        return f'<div class="img-placeholder">📷 Niet gevonden: images_nl/{filename}</div>'
-    with open(str(path), "rb") as f:
-        b64 = base64.b64encode(f.read()).decode()
+        return ""
+    with open(str(path), "rb") as fh:
+        return base64.b64encode(fh.read()).decode()
+
+def _float_image_html(key: str, width: int = 280) -> str:
+    """Return HTML for a float:right image."""
+    b64 = _img_b64(key)
+    if not b64:
+        return ""
     return (
         f'<img src="data:image/png;base64,{b64}" '
         f'width="{width}" '
-        f'style="float:right;margin-left:20px;margin-bottom:10px;max-width:{width}px;">' 
+        f'style="float:right;margin-left:24px;margin-bottom:12px;">' 
     )
 
 
@@ -511,32 +517,50 @@ if st.session_state.step < STEP_THANKYOU:
 if st.session_state.step == STEP_INTRO:
     st.title("🚆 Succesfactoren voor Voorstedelijk Spoorvervoer")
     st.subheader("Expertenquête — Best-Worst Methode (BWM)")
-    # Float image right so all text flows naturally beside it
-    _intro_img_html = _float_image_html("intro", width=320)
-    st.markdown(_intro_img_html, unsafe_allow_html=True)
-    st.markdown("""
-**Welkom bij deze expertenquête.** Dit onderzoek richt zich op het identificeren van
-factoren die bijdragen aan het potentiële vraagstucces van voorstedelijk spoorvervoer
-in de Nederlandse context. De uitkomsten bieden een raamwerk voor besluitvorming over
-de implementatie van dergelijke diensten in Nederland, en worden gebruikt als invoer
-voor een modelleringsstudie.
 
-### Werkwijze
-Het onderzoek is opgebouwd in twee niveaus:
+    # Build category+factor list as HTML
+    cat_list_html = "".join(
+        f"<li><strong>{cat}</strong>: {', '.join(factors)}</li>"
+        for cat, factors in categories.items()
+    )
 
-- **Niveau 1 — Categorieën:** Eerst worden de vijf hoofdcategorieën ten opzichte van elkaar gerangschikt.
-- **Niveau 2 — Factoren:** Vervolgens worden per categorie de factoren ten opzichte van elkaar gerangschikt.
+    intro_b64 = _img_b64("intro")
+    img_tag = (
+        f'<img src="data:image/png;base64,{intro_b64}" ' +
+        'width="320" style="float:right;margin-left:24px;margin-bottom:12px;">' 
+        if intro_b64 else ""
+    )
 
-Per niveau wordt u gevraagd:
-1. De **meest belangrijke** en **minst belangrijke** factor of categorie aan te wijzen
-2. **Best-to-others**: hoeveel belangrijker is de beste dan alle anderen?
-3. **Others-to-worst**: hoeveel belangrijker is elke andere dan de slechtste?
+    st.markdown(f"""
+<div style="overflow:hidden;">
+{img_tag}
+<p><strong>Welkom bij deze expertenquête.</strong> Dit onderzoek richt zich op het
+identificeren van factoren die bijdragen aan het potentiële vraagstucces van
+voorstedelijk spoorvervoer in de Nederlandse context. De uitkomsten bieden een raamwerk
+voor besluitvorming over de implementatie van dergelijke diensten in Nederland, en
+worden gebruikt als invoer voor een modelleringsstudie.</p>
 
-### Categorieën & factoren
-""")
-    for cat, factors in categories.items():
-        st.markdown(f"- **{cat}**: {', '.join(factors)}")
-    st.markdown('<div style="clear:both;"></div>', unsafe_allow_html=True)
+<h3>Werkwijze</h3>
+<p>Het onderzoek is opgebouwd in twee niveaus:</p>
+<ul>
+<li><strong>Niveau 1 — Categorieën:</strong> Eerst worden de vijf hoofdcategorieën
+ten opzichte van elkaar gerangschikt.</li>
+<li><strong>Niveau 2 — Factoren:</strong> Vervolgens worden per categorie de factoren
+ten opzichte van elkaar gerangschikt.</li>
+</ul>
+<p>Per niveau wordt u gevraagd:</p>
+<ol>
+<li>De <strong>meest belangrijke</strong> en <strong>minst belangrijke</strong>
+factor of categorie aan te wijzen</li>
+<li><strong>Best-to-others</strong>: hoeveel belangrijker is de beste dan alle anderen?</li>
+<li><strong>Others-to-worst</strong>: hoeveel belangrijker is elke andere dan de slechtste?</li>
+</ol>
+
+<h3>Categorieën &amp; factoren</h3>
+<ul>{cat_list_html}</ul>
+<div style="clear:both;"></div>
+</div>
+""", unsafe_allow_html=True)
     st.button("Start enquête →", on_click=next_step, type="primary")
 
 # ══════════════════════════════════════════════
@@ -639,9 +663,22 @@ elif st.session_state.step == STEP_PERSONAL:
 # STEP 3: SELECTEER BESTE + SLECHTSTE CATEGORIE
 # ══════════════════════════════════════════════
 elif st.session_state.step == STEP_CAT_SELECT:
-    st.markdown(_float_image_html("intro", width=200), unsafe_allow_html=True)
-    st.title("Categorievergelijking — Stap 1 van 2")
-    st.markdown("Selecteer de categorie die u **het meest** en **het minst belangrijk** vindt.")
+    intro_b64 = _img_b64("intro")
+    cat_b64   = _img_b64("categories")
+    intro_tag = (f'<img src="data:image/png;base64,{intro_b64}" width="200" ' +
+                 'style="float:right;margin-left:20px;margin-bottom:8px;">' if intro_b64 else "")
+    cat_tag   = (f'<img src="data:image/png;base64,{cat_b64}" width="160" ' +
+                 'style="float:right;margin-left:12px;margin-bottom:8px;clear:right;">' if cat_b64 else "")
+    st.markdown(f"""
+<div style="overflow:hidden;">
+{intro_tag}
+{cat_tag}
+<h1>Categorievergelijking — Stap 1 van 2</h1>
+<p>Selecteer de categorie die u <strong>het meest</strong> en
+<strong>het minst belangrijk</strong> vindt.</p>
+<div style="clear:both;"></div>
+</div>
+""", unsafe_allow_html=True)
 
     if "best_cat_sel" not in st.session_state:
         saved_bc = st.session_state.data.get("categorie_best", None)
@@ -684,8 +721,20 @@ elif st.session_state.step == STEP_CAT_SELECT:
 elif st.session_state.step == STEP_CAT_CMP:
     best_cat  = st.session_state.data.get("categorie_best", cat_list[0])
     worst_cat = st.session_state.data.get("categorie_worst", cat_list[-1])
-    st.markdown(_float_image_html("intro", width=200), unsafe_allow_html=True)
-    st.title("Categorievergelijking — Stap 2 van 2")
+    intro_b64 = _img_b64("intro")
+    cat_b64   = _img_b64("categories")
+    intro_tag = (f'<img src="data:image/png;base64,{intro_b64}" width="200" ' +
+                 'style="float:right;margin-left:20px;margin-bottom:8px;">' if intro_b64 else "")
+    cat_tag   = (f'<img src="data:image/png;base64,{cat_b64}" width="160" ' +
+                 'style="float:right;margin-left:12px;margin-bottom:8px;clear:right;">' if cat_b64 else "")
+    st.markdown(f"""
+<div style="overflow:hidden;">
+{intro_tag}
+{cat_tag}
+<h1>Categorievergelijking — Stap 2 van 2</h1>
+<div style="clear:both;"></div>
+</div>
+""", unsafe_allow_html=True)
 
 
     st.subheader(f"Hoe veel belangrijker is '{best_cat}' dan de andere categorieën?")
