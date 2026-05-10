@@ -522,15 +522,16 @@ if st.session_state.step == STEP_INTRO:
     intro_b64 = _img_b64("intro")
     img_tag = (
         f'<img src="data:image/png;base64,{intro_b64}" ' +
-        'style="float:right;margin-left:28px;margin-bottom:16px;width:45%;max-width:420px;">' 
+        'style="float:right;margin-left:28px;margin-bottom:16px;width:48%;max-width:400px;">' 
         if intro_b64 else ""
     )
+    # Title and subheader rendered by Streamlit (full width, no wrapping)
+    st.title("🚆 Succesfactoren voor Voorstedelijk Spoorvervoer")
+    st.subheader("Expertenquête — Best-Worst Methode (BWM)")
+    # Body text + image in one block so float works
     st.markdown(f"""
 <div style="overflow:hidden;">
 {img_tag}
-<h1>🚆 Succesfactoren voor Voorstedelijk Spoorvervoer</h1>
-<h2>Expertenquête — Best-Worst Methode (BWM)</h2>
-
 <p><strong>Welkom bij deze expertenquête.</strong> Dit onderzoek richt zich op het
 identificeren van factoren die bijdragen aan het potentiële vraagstucces van
 voorstedelijk spoorvervoer in de Nederlandse context. De uitkomsten bieden een raamwerk
