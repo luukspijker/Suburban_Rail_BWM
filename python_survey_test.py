@@ -356,6 +356,14 @@ def nav_buttons(can_proceed=True):
 # ─────────────────────────────────────────────
 # SCROLL — unique token forces fresh iframe each time
 # ─────────────────────────────────────────────
+# ─────────────────────────────────────────────
+# SIDEBAR — volledig overzicht op elke pagina
+# ─────────────────────────────────────────────
+with st.sidebar:
+    st.markdown("### 📋 Volledig overzicht")
+    st.caption("Categorieën (Niveau 1) en factoren (Niveau 2)")
+    show_page_image("intro")
+
 if st.session_state.step != st.session_state.prev_step:
     _tok = random.randint(0, 9999999)
     st.components.v1.html(f"""<script>
@@ -515,11 +523,9 @@ if st.session_state.step < STEP_THANKYOU:
 # STEP 1: INTRODUCTIE
 # ══════════════════════════════════════════════
 if st.session_state.step == STEP_INTRO:
-    col_text, col_img = st.columns([3, 2])
-    with col_text:
-        st.title("🚆 Succesfactoren voor Voorstedelijk Spoorvervoer")
-        st.subheader("Expertenquête — Best-Worst Methode (BWM)")
-        st.markdown("""
+    st.title("🚆 Succesfactoren voor Voorstedelijk Spoorvervoer")
+    st.subheader("Expertenquête — Best-Worst Methode (BWM)")
+    st.markdown("""
 **Welkom bij deze expertenquête.** Dit onderzoek richt zich op het identificeren van
 factoren die bijdragen aan het potentiële vraagstucces van voorstedelijk spoorvervoer
 in de Nederlandse context. De uitkomsten bieden een raamwerk voor besluitvorming over
@@ -541,11 +547,10 @@ Per niveau wordt u gevraagd:
 
 ### Categorieën & factoren
 """)
-        for cat, factors in categories.items():
-            st.markdown(f"- **{cat}**: {', '.join(factors)}")
-        st.button("Start enquête →", on_click=next_step, type="primary")
-    with col_img:
-        show_page_image("intro")
+    for cat, factors in categories.items():
+        st.markdown(f"- **{cat}**: {', '.join(factors)}")
+    st.info("💡 Het volledige overzicht van categorieën en factoren is te vinden in de **zijbalk** rechts →")
+    st.button("Start enquête →", on_click=next_step, type="primary")
 
 # ══════════════════════════════════════════════
 # STEP 2: TOESTEMMING (GDPR CONSENT)
@@ -647,12 +652,8 @@ elif st.session_state.step == STEP_PERSONAL:
 # STEP 3: SELECTEER BESTE + SLECHTSTE CATEGORIE
 # ══════════════════════════════════════════════
 elif st.session_state.step == STEP_CAT_SELECT:
-    col_text, col_img = st.columns([3, 2])
-    with col_text:
-        st.title("Categorievergelijking — Stap 1 van 2")
-        st.markdown("Selecteer de categorie die u **het meest** en **het minst belangrijk** vindt.")
-    with col_img:
-        show_page_image("intro")
+    st.title("Categorievergelijking — Stap 1 van 2")
+    st.markdown("Selecteer de categorie die u **het meest** en **het minst belangrijk** vindt.")
 
     if "best_cat_sel" not in st.session_state:
         saved_bc = st.session_state.data.get("categorie_best", None)
@@ -695,11 +696,7 @@ elif st.session_state.step == STEP_CAT_SELECT:
 elif st.session_state.step == STEP_CAT_CMP:
     best_cat  = st.session_state.data.get("categorie_best", cat_list[0])
     worst_cat = st.session_state.data.get("categorie_worst", cat_list[-1])
-    col_text, col_img = st.columns([3, 2])
-    with col_text:
-        st.title("Categorievergelijking — Stap 2 van 2")
-    with col_img:
-        show_page_image("intro")
+    st.title("Categorievergelijking — Stap 2 van 2")
 
 
     st.subheader(f"Hoe veel belangrijker is '{best_cat}' dan de andere categorieën?")
