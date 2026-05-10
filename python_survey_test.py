@@ -515,51 +515,37 @@ if st.session_state.step < STEP_THANKYOU:
 # STEP 1: INTRODUCTIE
 # ══════════════════════════════════════════════
 if st.session_state.step == STEP_INTRO:
-    cat_list_html = "".join(
-        f"<li><strong>{cat}</strong>: {', '.join(factors)}</li>"
-        for cat, factors in categories.items()
-    )
-    intro_b64 = _img_b64("intro")
-    img_tag = (
-        f'<img src="data:image/png;base64,{intro_b64}" ' +
-        'style="float:right;margin-left:28px;margin-bottom:16px;width:48%;max-width:400px;">' 
-        if intro_b64 else ""
-    )
-    # Title and subheader rendered by Streamlit (full width, no wrapping)
-    st.title("🚆 Succesfactoren voor Voorstedelijk Spoorvervoer")
-    st.subheader("Expertenquête — Best-Worst Methode (BWM)")
-    # Body text + image in one block so float works
-    st.markdown(f"""
-<div style="overflow:hidden;">
-{img_tag}
-<p><strong>Welkom bij deze expertenquête.</strong> Dit onderzoek richt zich op het
-identificeren van factoren die bijdragen aan het potentiële vraagstucces van
-voorstedelijk spoorvervoer in de Nederlandse context. De uitkomsten bieden een raamwerk
-voor besluitvorming over de implementatie van dergelijke diensten in Nederland, en
-worden gebruikt als invoer voor een modelleringsstudie.</p>
+    col_text, col_img = st.columns([3, 2])
+    with col_text:
+        st.title("🚆 Succesfactoren voor Voorstedelijk Spoorvervoer")
+        st.subheader("Expertenquête — Best-Worst Methode (BWM)")
+        st.markdown("""
+**Welkom bij deze expertenquête.** Dit onderzoek richt zich op het identificeren van
+factoren die bijdragen aan het potentiële vraagstucces van voorstedelijk spoorvervoer
+in de Nederlandse context. De uitkomsten bieden een raamwerk voor besluitvorming over
+de implementatie van dergelijke diensten in Nederland, en worden gebruikt als invoer
+voor een modelleringsstudie.
 
-<h3>Werkwijze</h3>
-<p>Het onderzoek is opgebouwd in twee niveaus:</p>
-<ul>
-<li><strong>Niveau 1 — Categorieën:</strong> Eerst worden de vijf hoofdcategorieën
-ten opzichte van elkaar gerangschikt.</li>
-<li><strong>Niveau 2 — Factoren:</strong> Vervolgens worden per categorie de factoren
-ten opzichte van elkaar gerangschikt.</li>
-</ul>
-<p>Per niveau wordt u gevraagd:</p>
-<ol>
-<li>De <strong>meest belangrijke</strong> en <strong>minst belangrijke</strong>
-factor of categorie aan te wijzen</li>
-<li><strong>Best-to-others</strong>: hoeveel belangrijker is de beste dan alle anderen?</li>
-<li><strong>Others-to-worst</strong>: hoeveel belangrijker is elke andere dan de slechtste?</li>
-</ol>
+### Werkwijze
+Het onderzoek is opgebouwd in twee niveaus:
 
-<h3>Categorieën &amp; factoren</h3>
-<ul>{cat_list_html}</ul>
-<div style="clear:both;"></div>
-</div>
-""", unsafe_allow_html=True)
-    st.button("Start enquête →", on_click=next_step, type="primary")
+- **Niveau 1 — Categorieën:** Eerst worden de vijf hoofdcategorieën ten opzichte van
+  elkaar gerangschikt.
+- **Niveau 2 — Factoren:** Vervolgens worden per categorie de factoren ten opzichte van
+  elkaar gerangschikt.
+
+Per niveau wordt u gevraagd:
+1. De **meest belangrijke** en **minst belangrijke** factor of categorie aan te wijzen
+2. **Best-to-others**: hoeveel belangrijker is de beste dan alle anderen?
+3. **Others-to-worst**: hoeveel belangrijker is elke andere dan de slechtste?
+
+### Categorieën & factoren
+""")
+        for cat, factors in categories.items():
+            st.markdown(f"- **{cat}**: {', '.join(factors)}")
+        st.button("Start enquête →", on_click=next_step, type="primary")
+    with col_img:
+        show_page_image("intro")
 
 # ══════════════════════════════════════════════
 # STEP 2: TOESTEMMING (GDPR CONSENT)
@@ -661,22 +647,12 @@ elif st.session_state.step == STEP_PERSONAL:
 # STEP 3: SELECTEER BESTE + SLECHTSTE CATEGORIE
 # ══════════════════════════════════════════════
 elif st.session_state.step == STEP_CAT_SELECT:
-    intro_b64 = _img_b64("intro")
-    cat_b64   = _img_b64("categories")
-    intro_tag = (f'<img src="data:image/png;base64,{intro_b64}" width="200" ' +
-                 'style="float:right;margin-left:20px;margin-bottom:8px;">' if intro_b64 else "")
-    cat_tag   = (f'<img src="data:image/png;base64,{cat_b64}" width="160" ' +
-                 'style="float:right;margin-left:12px;margin-bottom:8px;clear:right;">' if cat_b64 else "")
-    st.markdown(f"""
-<div style="overflow:hidden;">
-{intro_tag}
-{cat_tag}
-<h1>Categorievergelijking — Stap 1 van 2</h1>
-<p>Selecteer de categorie die u <strong>het meest</strong> en
-<strong>het minst belangrijk</strong> vindt.</p>
-<div style="clear:both;"></div>
-</div>
-""", unsafe_allow_html=True)
+    col_text, col_img = st.columns([3, 2])
+    with col_text:
+        st.title("Categorievergelijking — Stap 1 van 2")
+        st.markdown("Selecteer de categorie die u **het meest** en **het minst belangrijk** vindt.")
+    with col_img:
+        show_page_image("intro")
 
     if "best_cat_sel" not in st.session_state:
         saved_bc = st.session_state.data.get("categorie_best", None)
@@ -719,20 +695,11 @@ elif st.session_state.step == STEP_CAT_SELECT:
 elif st.session_state.step == STEP_CAT_CMP:
     best_cat  = st.session_state.data.get("categorie_best", cat_list[0])
     worst_cat = st.session_state.data.get("categorie_worst", cat_list[-1])
-    intro_b64 = _img_b64("intro")
-    cat_b64   = _img_b64("categories")
-    intro_tag = (f'<img src="data:image/png;base64,{intro_b64}" width="200" ' +
-                 'style="float:right;margin-left:20px;margin-bottom:8px;">' if intro_b64 else "")
-    cat_tag   = (f'<img src="data:image/png;base64,{cat_b64}" width="160" ' +
-                 'style="float:right;margin-left:12px;margin-bottom:8px;clear:right;">' if cat_b64 else "")
-    st.markdown(f"""
-<div style="overflow:hidden;">
-{intro_tag}
-{cat_tag}
-<h1>Categorievergelijking — Stap 2 van 2</h1>
-<div style="clear:both;"></div>
-</div>
-""", unsafe_allow_html=True)
+    col_text, col_img = st.columns([3, 2])
+    with col_text:
+        st.title("Categorievergelijking — Stap 2 van 2")
+    with col_img:
+        show_page_image("intro")
 
 
     st.subheader(f"Hoe veel belangrijker is '{best_cat}' dan de andere categorieën?")
