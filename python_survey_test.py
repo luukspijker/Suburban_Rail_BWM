@@ -449,6 +449,25 @@ def compare_label(term_a, desc_a, term_b, desc_b):
         ' dan <span class="tb">' + term_b + '</span>' + tip_b + '?</p>',
         unsafe_allow_html=True)
 
+def _float_image_html(key: str, width: int = 280) -> str:
+    """Return HTML that floats an image to the right so text flows beside it."""
+    from pathlib import Path
+    import base64
+    filename = IMAGES.get(key, "")
+    if not filename:
+        return ""
+    path = Path(__file__).parent / "images_nl" / filename
+    if not path.exists():
+        return f'<div class="img-placeholder">📷 Niet gevonden: images_nl/{filename}</div>'
+    with open(str(path), "rb") as f:
+        b64 = base64.b64encode(f.read()).decode()
+    return (
+        f'<img src="data:image/png;base64,{b64}" '
+        f'width="{width}" '
+        f'style="float:right;margin-left:20px;margin-bottom:10px;max-width:{width}px;">' 
+    )
+
+
 def show_page_image(key: str, width: int = None):
     """
     Display a PNG from the IMAGES dict. Images live in the 'images' subfolder.
@@ -492,9 +511,10 @@ if st.session_state.step < STEP_THANKYOU:
 if st.session_state.step == STEP_INTRO:
     st.title("🚆 Succesfactoren voor Voorstedelijk Spoorvervoer")
     st.subheader("Expertenquête — Best-Worst Methode (BWM)")
-    col_text, col_img = st.columns([1, 1])
-    with col_text:
-        st.markdown("""
+    # Float image right so all text flows naturally beside it
+    _intro_img_html = _float_image_html("intro", width=320)
+    st.markdown(_intro_img_html, unsafe_allow_html=True)
+    st.markdown("""
 **Welkom bij deze expertenquête.** Dit onderzoek richt zich op het identificeren van
 factoren die bijdragen aan het potentiële vraagstucces van voorstedelijk spoorvervoer
 in de Nederlandse context. De uitkomsten bieden een raamwerk voor besluitvorming over
@@ -514,13 +534,10 @@ Per niveau wordt u gevraagd:
 
 ### Categorieën & factoren
 """)
-        for cat, factors in categories.items():
-            st.markdown(f"- **{cat}**: {', '.join(factors)}")
-        st.button("Start enquête →", on_click=next_step, type="primary")
-    with col_img:
-        st.markdown('<div style="margin-left:16px;">', unsafe_allow_html=True)
-        show_page_image("intro")
-        st.markdown('</div>', unsafe_allow_html=True)
+    for cat, factors in categories.items():
+        st.markdown(f"- **{cat}**: {', '.join(factors)}")
+    st.markdown('<div style="clear:both;"></div>', unsafe_allow_html=True)
+    st.button("Start enquête →", on_click=next_step, type="primary")
 
 # ══════════════════════════════════════════════
 # STEP 2: TOESTEMMING (GDPR CONSENT)
@@ -622,12 +639,9 @@ elif st.session_state.step == STEP_PERSONAL:
 # STEP 3: SELECTEER BESTE + SLECHTSTE CATEGORIE
 # ══════════════════════════════════════════════
 elif st.session_state.step == STEP_CAT_SELECT:
-    col_left, col_right = st.columns([3, 1])
-    with col_left:
-        st.title("Categorievergelijking — Stap 1 van 2")
-        st.markdown("Selecteer de categorie die u **het meest** en **het minst belangrijk** vindt.")
-    with col_right:
-        show_page_image("intro", width=160)
+    st.markdown(_float_image_html("intro", width=200), unsafe_allow_html=True)
+    st.title("Categorievergelijking — Stap 1 van 2")
+    st.markdown("Selecteer de categorie die u **het meest** en **het minst belangrijk** vindt.")
 
     if "best_cat_sel" not in st.session_state:
         saved_bc = st.session_state.data.get("categorie_best", None)
@@ -670,11 +684,8 @@ elif st.session_state.step == STEP_CAT_SELECT:
 elif st.session_state.step == STEP_CAT_CMP:
     best_cat  = st.session_state.data.get("categorie_best", cat_list[0])
     worst_cat = st.session_state.data.get("categorie_worst", cat_list[-1])
-    col_left, col_right = st.columns([3, 1])
-    with col_left:
-        st.title("Categorievergelijking — Stap 2 van 2")
-    with col_right:
-        show_page_image("intro", width=160)
+    st.markdown(_float_image_html("intro", width=200), unsafe_allow_html=True)
+    st.title("Categorievergelijking — Stap 2 van 2")
 
 
     st.subheader(f"Hoe veel belangrijker is '{best_cat}' dan de andere categorieën?")
