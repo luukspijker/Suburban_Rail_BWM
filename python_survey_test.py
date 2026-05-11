@@ -562,7 +562,7 @@ if st.session_state.step == STEP_INTRO:
     st.title("🚆 Succesfactoren voor stadsgewestelijk railvervoer")
     st.subheader("Expertenquête — Best-Worst Methode (BWM)")
     st.markdown("""
-**Welkom bij deze expertenquête.** Dit onderzoek richt zich op het identificeren van factoren die bijdragen aan het potentiële succes van stadsgewestelijk railvervoer in Nederland, gemeten in termen van reizigersvraag. Denk hierbij aan systemen zoals de S-Bahn, RER of S-Tog.
+**Welkom bij deze expertenquête.** Dit onderzoek richt zich op het identificeren van factoren die bijdragen aan het potentiële succes van een toekomstig stadsgewestelijk railconcept in Nederland, gemeten in termen van reizigersvraag. Denk hierbij aan systemen zoals de S-Bahn, RER of S-Tog.
 De huidige lijst van factoren is opgesteld op basis van literatuur en interviews met (internationale) experts.
 
 De resultaten worden gebruikt om een afwegingskader op te stellen voor de mogelijke implementatie van dergelijke systemen in de Nederlandse context, en dienen daarnaast als invoer voor een modelleringsstudie.
