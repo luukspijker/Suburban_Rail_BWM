@@ -92,6 +92,15 @@ st.markdown("""
     .bwm-cmp .ta { font-weight:600; }
     .bwm-cmp .tb { color:#64748b; }
 
+    /* ── Wide sidebar ── */
+    section[data-testid="stSidebar"] {
+        width: 420px !important;
+        min-width: 420px !important;
+    }
+    section[data-testid="stSidebar"] > div {
+        width: 420px !important;
+    }
+
     /* ── Image placeholder ── */
     .img-placeholder {
         width:100%; height:180px;
@@ -171,15 +180,12 @@ factor_descriptions = {
 categories = {cat: list(f.keys()) for cat, f in factor_descriptions.items()}
 
 scale = {
-    "Gelijk belangrijk":             1,
     "Iets meer belangrijk":          2,
     "Enigszins meer belangrijk":     3,
     "Matig meer belangrijk":         4,
     "Duidelijk meer belangrijk":     5,
     "Aanzienlijk meer belangrijk":   6,
-    "Sterk meer belangrijk":         7,
-    "Veel meer belangrijk":          8,
-    "Absoluut meer belangrijk":      9,
+    "Absoluut meer belangrijk":      7,
 }
 scale_labels = list(scale.keys())
 
@@ -357,6 +363,39 @@ def nav_buttons(can_proceed=True):
 # SCROLL — unique token forces fresh iframe each time
 # ─────────────────────────────────────────────
 # ─────────────────────────────────────────────
+# SIDEBAR — volledig overzicht op elke pagina
+# ─────────────────────────────────────────────
+with st.sidebar:
+    st.markdown("### 📋 Volledig overzicht")
+    st.caption("Categorieën (Niveau 1) en factoren (Niveau 2)")
+    show_page_image("intro")
+
+if st.session_state.step != st.session_state.prev_step:
+    _tok = random.randint(0, 9999999)
+    st.components.v1.html(f"""<script>
+// {_tok}
+(function() {{
+    function doScroll() {{
+        try {{
+            var d = window.parent.document;
+            ['section.main','[data-testid="stMain"]',
+             '[data-testid="stAppViewContainer"] > section'].forEach(function(s) {{
+                var el = d.querySelector(s);
+                if (el) el.scrollTop = 0;
+            }});
+            d.documentElement.scrollTop = 0;
+            d.body.scrollTop = 0;
+            window.parent.scrollTo(0,0);
+        }} catch(e) {{}}
+    }}
+    doScroll();
+    setTimeout(doScroll, 120);
+    setTimeout(doScroll, 350);
+}})();
+</script>""", height=0)
+    st.session_state.prev_step = st.session_state.step
+
+# ─────────────────────────────────────────────
 # HELPERS
 # ─────────────────────────────────────────────
 def tip_html(desc):
@@ -476,40 +515,6 @@ def show_page_image(key: str, width: int = None):
         st.markdown(
             f'<div class="img-placeholder">📷 Afbeelding niet gevonden: images/{filename}</div>',
             unsafe_allow_html=True)
-# ─────────────────────────────────────────────
-# SIDEBAR — volledig overzicht op elke pagina
-# ─────────────────────────────────────────────
-with st.sidebar:
-    st.markdown("### 📋 Volledig overzicht")
-    st.caption("Categorieën (Niveau 1) en factoren (Niveau 2)")
-    show_page_image("intro")
-
-if st.session_state.step != st.session_state.prev_step:
-    _tok = random.randint(0, 9999999)
-    st.components.v1.html(f"""<script>
-// {_tok}
-(function() {{
-    function doScroll() {{
-        try {{
-            var d = window.parent.document;
-            ['section.main','[data-testid="stMain"]',
-             '[data-testid="stAppViewContainer"] > section'].forEach(function(s) {{
-                var el = d.querySelector(s);
-                if (el) el.scrollTop = 0;
-            }});
-            d.documentElement.scrollTop = 0;
-            d.body.scrollTop = 0;
-            window.parent.scrollTo(0,0);
-        }} catch(e) {{}}
-    }}
-    doScroll();
-    setTimeout(doScroll, 120);
-    setTimeout(doScroll, 350);
-}})();
-</script>""", height=0)
-    st.session_state.prev_step = st.session_state.step
-
-
 
 # ─────────────────────────────────────────────
 # PROGRESS BAR + IMAGE PLACEHOLDER
@@ -550,7 +555,7 @@ Per niveau wordt u gevraagd:
 """)
     for cat, factors in categories.items():
         st.markdown(f"- **{cat}**: {', '.join(factors)}")
-    st.info("💡 Het volledige overzicht van categorieën en factoren is te vinden in de **zijbalk** rechts →")
+    st.info("💡 Het volledige overzicht van categorieën en factoren is te vinden in de **zijbalk** links ←")
     st.button("Start enquête →", on_click=next_step, type="primary")
 
 # ══════════════════════════════════════════════
