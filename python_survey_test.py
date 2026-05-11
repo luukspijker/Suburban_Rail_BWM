@@ -590,6 +590,7 @@ Per niveau wordt u gevraagd:
     st.warning(
         "⚠️ Let op: tussentijdse voortgang wordt niet opgeslagen. "
         "Gelieve de enquête in één sessie af te ronden en het tabblad niet te verversen."
+    )
     st.button("Start enquête →", on_click=next_step, type="primary")
 
 # ══════════════════════════════════════════════
