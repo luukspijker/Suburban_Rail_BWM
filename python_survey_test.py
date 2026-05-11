@@ -418,23 +418,22 @@ def card_select(options, state_key, descriptions=None):
 
 def scale_slider(label, key, saved_value=None):
 
-    options = list(range(1,10))
+    options = list(range(1, 10))
 
-    chosen = st.radio(
+    default = saved_value if saved_value in options else 1
+
+    chosen = st.select_slider(
         label,
         options=options,
-        horizontal=True,
-        index=options.index(saved_value) if saved_value in options else None,
-        format_func=lambda x:
-            f"{x}\n{scale_labels[x]}"
+        value=default,
+        format_func=lambda x: (
+            f"{x} — {scale_labels[x]}"
             if x in scale_labels
-            else str(x),
+            else str(x)
+        ),
         key=key
     )
 
-    return chosen
-
-    # Extra uitleg onder slider
     if chosen in scale_labels:
         st.caption(f"Interpretatie: **{scale_labels[chosen]}**")
     else:
