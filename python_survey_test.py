@@ -290,8 +290,8 @@ def save_to_sheets(data: dict):
         ]
 
         def to_num(value):
-    """Values are already numeric."""
-    return value if value else ""
+        """Values are already numeric."""
+        return value if value else ""
 
         # Category bto values (numeric)
         for cat in cat_list:
