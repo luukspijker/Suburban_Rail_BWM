@@ -360,33 +360,6 @@ def nav_buttons(can_proceed=True):
         col1.button("← Vorige", on_click=prev_step)
     col2.button("Volgende →", on_click=next_step,
                 disabled=not can_proceed, type="primary")
-
-# ─────────────────────────────────────────────
-# SCROLL — unique token forces fresh iframe each time
-    _tok = random.randint(0, 9999999)
-    st.components.v1.html(f"""<script>
-// {_tok}
-(function() {{
-    function doScroll() {{
-        try {{
-            var d = window.parent.document;
-            ['section.main','[data-testid="stMain"]',
-             '[data-testid="stAppViewContainer"] > section'].forEach(function(s) {{
-                var el = d.querySelector(s);
-                if (el) el.scrollTop = 0;
-            }});
-            d.documentElement.scrollTop = 0;
-            d.body.scrollTop = 0;
-            window.parent.scrollTo(0,0);
-        }} catch(e) {{}}
-    }}
-    doScroll();
-    setTimeout(doScroll, 120);
-    setTimeout(doScroll, 350);
-}})();
-</script>""", height=0)
-    st.session_state.prev_step = st.session_state.step
-
 # ─────────────────────────────────────────────
 # HELPERS
 # ─────────────────────────────────────────────
