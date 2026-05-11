@@ -361,16 +361,6 @@ def nav_buttons(can_proceed=True):
 
 # ─────────────────────────────────────────────
 # SCROLL — unique token forces fresh iframe each time
-# ─────────────────────────────────────────────
-# ─────────────────────────────────────────────
-# SIDEBAR — volledig overzicht op elke pagina
-# ─────────────────────────────────────────────
-with st.sidebar:
-    st.markdown("### 📋 Volledig overzicht")
-    st.caption("Categorieën (Niveau 1) en factoren (Niveau 2)")
-    show_page_image("intro")
-
-if st.session_state.step != st.session_state.prev_step:
     _tok = random.randint(0, 9999999)
     st.components.v1.html(f"""<script>
 // {_tok}
@@ -517,13 +507,56 @@ def show_page_image(key: str, width: int = None):
             unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────
-# PROGRESS BAR + IMAGE PLACEHOLDER
+
+# ─────────────────────────────────────────────
+# ─────────────────────────────────────────────
+# SIDEBAR — volledig overzicht op elke pagina
+
+# ─────────────────────────────────────────────
+# SCROLL TO TOP
+# ─────────────────────────────────────────────
+if st.session_state.step != st.session_state.prev_step:
+    _tok = random.randint(0, 9999999)
+    st.components.v1.html(f"""<script>
+// {_tok}
+(function() {{
+    function doScroll() {{
+        try {{
+            var d = window.parent.document;
+            ['section.main','[data-testid="stMain"]',
+             '[data-testid="stAppViewContainer"] > section'].forEach(function(s) {{
+                var el = d.querySelector(s);
+                if (el) el.scrollTop = 0;
+            }});
+            d.documentElement.scrollTop = 0;
+            d.body.scrollTop = 0;
+            window.parent.scrollTo(0,0);
+        }} catch(e) {{}}
+    }}
+    doScroll();
+    setTimeout(doScroll, 120);
+    setTimeout(doScroll, 350);
+}})();
+</script>""", height=0)
+    st.session_state.prev_step = st.session_state.step
+
+# ─────────────────────────────────────────────
+# SIDEBAR — volledig overzicht op elke pagina
+# ─────────────────────────────────────────────
+with st.sidebar:
+    st.markdown("### 📋 Volledig overzicht")
+    st.caption("Categorieën (Niveau 1) en factoren (Niveau 2)")
+    show_page_image("intro")
+
+# ─────────────────────────────────────────────
+# PROGRESS BAR
 # ─────────────────────────────────────────────
 if st.session_state.step < STEP_THANKYOU:
     pct = min((st.session_state.step - 1) / max(TOTAL_STEPS - 1, 1), 1.0)
     st.progress(pct)
     st.caption(f"Voortgang: **{int(pct * 100)}%** voltooid")
     st.markdown("---")
+
 
 # ══════════════════════════════════════════════
 # STEP 1: INTRODUCTIE
