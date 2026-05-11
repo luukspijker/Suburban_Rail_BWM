@@ -587,6 +587,9 @@ Per niveau wordt u gevraagd:
     for cat, factors in categories.items():
         st.markdown(f"- **{cat}**: {', '.join(factors)}")
     st.info("💡 Het volledige overzicht van categorieën en factoren is te vinden in de **zijbalk** links ←")
+    st.warning(
+        "⚠️ Let op: tussentijdse voortgang wordt niet opgeslagen. "
+        "Gelieve de enquête in één sessie af te ronden en het tabblad niet te verversen."
     st.button("Start enquête →", on_click=next_step, type="primary")
 
 # ══════════════════════════════════════════════
