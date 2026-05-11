@@ -4,7 +4,6 @@
 import streamlit as st
 import json
 import random
-import math
 import gspread
 from google.oauth2.service_account import Credentials
 from datetime import datetime
@@ -211,7 +210,8 @@ TOTAL_STEPS           = STEP_SUMMARY  # progress bar goes up to summary only
 # ─────────────────────────────────────────────
 # SESSION STATE
 # ─────────────────────────────────────────────
-for _k, _v in [("step", STEP_INTRO), ("data", {}), ("errors", []), ("prev_step", -1)]:
+for _k, _v in [("step", STEP_INTRO), ("data", {}), ("errors", []),
+               ("do_scroll", False)]:
     if _k not in st.session_state:
         st.session_state[_k] = _v
 
@@ -343,10 +343,12 @@ def save_to_sheets(data: dict):
 def next_step():
     st.session_state.step += 1
     st.session_state.errors = []
+    st.session_state.do_scroll = True
 
 def prev_step():
     st.session_state.step -= 1
     st.session_state.errors = []
+    st.session_state.do_scroll = True
 
 def show_errors():
     for e in st.session_state.errors:
@@ -515,7 +517,7 @@ def show_page_image(key: str, width: int = None):
 # ─────────────────────────────────────────────
 # SCROLL TO TOP
 # ─────────────────────────────────────────────
-if st.session_state.step != st.session_state.prev_step:
+if st.session_state.do_scroll:
     _tok = random.randint(0, 9999999)
     st.components.v1.html(f"""<script>
 // {_tok}
@@ -538,7 +540,7 @@ if st.session_state.step != st.session_state.prev_step:
     setTimeout(doScroll, 350);
 }})();
 </script>""", height=0)
-    st.session_state.prev_step = st.session_state.step
+    st.session_state.do_scroll = False
 
 # ─────────────────────────────────────────────
 # SIDEBAR — volledig overzicht op elke pagina
@@ -864,11 +866,11 @@ elif st.session_state.step == STEP_SUMMARY:
         with col1:
             st.markdown("**Best-to-others:**")
             for k, v in st.session_state.data.get("categorie_best_to_others", {}).items():
-                st.write(f"- {k}: {v} ({scale.get(v,'?')})")
+                st.write(f"- {k}: {v}")
         with col2:
             st.markdown("**Others-to-worst:**")
             for k, v in st.session_state.data.get("categorie_others_to_worst", {}).items():
-                st.write(f"- {k}: {v} ({scale.get(v,'?')})")
+                st.write(f"- {k}: {v}")
 
     for cat in cat_list:
         cd = st.session_state.data.get("factoren", {}).get(cat, {})
@@ -878,11 +880,11 @@ elif st.session_state.step == STEP_SUMMARY:
             with col1:
                 st.markdown("**Best-to-others:**")
                 for k, v in cd.get("best_to_others", {}).items():
-                    st.write(f"- {k}: {v} ({scale.get(v,'?')})")
+                    st.write(f"- {k}: {v}")
             with col2:
                 st.markdown("**Others-to-worst:**")
                 for k, v in cd.get("others_to_worst", {}).items():
-                    st.write(f"- {k}: {v} ({scale.get(v,'?')})")
+                    st.write(f"- {k}: {v}")
 
     st.markdown("---")
     st.subheader("💬 Opmerkingen & aanbevelingen")
