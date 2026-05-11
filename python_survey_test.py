@@ -542,7 +542,7 @@ if st.session_state.do_scroll:
 # ─────────────────────────────────────────────
 with st.sidebar:
     st.markdown("### 📋 Volledig overzicht")
-    st.caption("Categorieën (Niveau 1) en factoren (Niveau 2)")
+    st.caption("Categorieën (Level 1) en factoren (Level 2)")
     show_page_image("intro")
 
 # ─────────────────────────────────────────────
@@ -559,14 +559,15 @@ if st.session_state.step < STEP_THANKYOU:
 # STEP 1: INTRODUCTIE
 # ══════════════════════════════════════════════
 if st.session_state.step == STEP_INTRO:
-    st.title("🚆 Succesfactoren voor Voorstedelijk Spoorvervoer")
+    st.title("🚆 Succesfactoren voor stadsgewestelijk railvervoer")
     st.subheader("Expertenquête — Best-Worst Methode (BWM)")
     st.markdown("""
-**Welkom bij deze expertenquête.** Dit onderzoek richt zich op het identificeren van
-factoren die bijdragen aan het potentiële vraagstucces van voorstedelijk spoorvervoer
-in de Nederlandse context. De uitkomsten bieden een raamwerk voor besluitvorming over
-de implementatie van dergelijke diensten in Nederland, en worden gebruikt als invoer
-voor een modelleringsstudie.
+**Welkom bij deze expertenquête.** Dit onderzoek richt zich op het identificeren van factoren die bijdragen aan het potentiële succes van stadsgewestelijk railvervoer in Nederland, gemeten in termen van reizigersvraag. Denk hierbij aan systemen zoals de S-Bahn, RER of S-Tog.
+De huidige lijst van factoren is opgesteld op basis van literatuur en interviews met (internationale) experts.
+
+De resultaten worden gebruikt om een afwegingskader op te stellen voor de mogelijke implementatie van dergelijke systemen in de Nederlandse context, en dienen daarnaast als invoer voor een modelleringsstudie.
+
+Het invullen van de vragenlijst duurt ongeveer 10–15 minuten. Er zijn geen goede of foute antwoorden; het gaat om uw professionele inschatting en ervaring.
 
 ### Werkwijze
 Het onderzoek is opgebouwd in twee niveaus:
@@ -597,10 +598,8 @@ elif st.session_state.step == STEP_CONSENT:
 ### Informatie over dit onderzoek
 
 Dit onderzoek wordt uitgevoerd door **Luuk Spijker** als onderdeel van een afstudeeronderzoek
-aan de **Universiteit Twente** (faculteit ITC / Civiele Techniek).
+voor de studie Transport Engineering aan de **Universiteit Twente**.
 
-Het doel is het bepalen van de relatieve belangrijkheid van succesfactoren voor voorstedelijk
-spoorvervoer met behulp van de Best-Worst Methode (BWM).
 """)
 
     st.markdown("---")
@@ -609,16 +608,15 @@ spoorvervoer met behulp van de Best-Worst Methode (BWM).
 - **Wat wordt verzameld:** uw rol, organisatie, expertisegebied en de antwoorden op de vergelijkingsvragen.
   Uw naam is **optioneel** en niet vereist voor deelname.
 - **Opslag:** alle gegevens worden opgeslagen in een beveiligd Google Workspace-account
-  gekoppeld aan de Universiteit Twente (@utwente.nl).
-- **Toegang:** alleen de onderzoeker (Luuk Spijker) en de begeleidende supervisor hebben
+  gekoppeld aan de Universiteit Twente (@student.utwente.nl).
+- **Toegang:** alleen de onderzoeker (Luuk Spijker) en de begeleidende supervisors hebben
   toegang tot de ruwe data.
 - **Bewaartermijn:** alle verzamelde data wordt verwijderd na afronding en goedkeuring
-  van het onderzoek (uiterlijk december 2025).
+  van het onderzoek (uiterlijk oktober 2026).
 - **Rechtsgrond:** deelname is vrijwillig en gebaseerd op uw toestemming (AVG Art. 6(1)(a)).
 - **Recht op intrekking:** u kunt uw deelname te allen tijde intrekken en verzoeken om
   verwijdering van uw data door contact op te nemen via
-  **l.spijker@student.utwente.nl**.
-- **Privacyverklaring:** zie de [privacyverklaring van de Universiteit Twente](https://www.utwente.nl/en/privacy/).
+  **l.m.spijker@student.utwente.nl**.
 """)
 
     st.markdown("---")
@@ -907,7 +905,7 @@ elif st.session_state.step == STEP_SUMMARY:
             st.session_state.step = STEP_THANKYOU
             st.rerun()
         else:
-            st.error("❌ Er is iets misgegaan. Probeer opnieuw of neem contact op via l.spijker@student.utwente.nl")
+            st.error("❌ Er is iets misgegaan. Probeer opnieuw of neem contact op via l.m.spijker@student.utwente.nl")
             with st.expander("📋 Ruwe data (backup — kopieer dit indien nodig)", expanded=True):
                 st.json(st.session_state.data)
 
@@ -922,13 +920,13 @@ elif st.session_state.step == STEP_THANKYOU:
   <h1 style="color:#1e293b;">Hartelijk bedankt voor uw deelname!</h1>
   <p style="font-size:1.1rem;color:#475569;max-width:500px;margin:1rem auto 2rem;">
     Uw antwoorden zijn succesvol opgeslagen en dragen bij aan het onderzoek naar
-    succesfactoren voor voorstedelijk spoorvervoer.
+    succesfactoren voor stadsgewestelijk railvervoer.
   </p>
   <hr style="border:none;border-top:1px solid #e2e8f0;margin:2rem 0;">
   <p style="color:#64748b;font-size:0.95rem;">
     Heeft u vragen over het onderzoek? Neem dan contact op via:<br>
-    <strong>📧 <a href="mailto:l.spijker@student.utwente.nl" style="color:#3b82f6;">
-    l.spijker@student.utwente.nl</a></strong>
+    <strong>📧 <a href="mailto:l.m.spijker@student.utwente.nl" style="color:#3b82f6;">
+    l.m.spijker@student.utwente.nl</a></strong>
   </p>
   <p style="color:#94a3b8;font-size:0.9rem;margin-top:2rem;">
     U kunt dit tabblad nu sluiten.
