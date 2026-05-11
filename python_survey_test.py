@@ -178,15 +178,18 @@ factor_descriptions = {
 
 categories = {cat: list(f.keys()) for cat, f in factor_descriptions.items()}
 
-scale = {
-    "Iets meer belangrijk":          2,
-    "Enigszins meer belangrijk":     3,
-    "Matig meer belangrijk":         4,
-    "Duidelijk meer belangrijk":     5,
-    "Aanzienlijk meer belangrijk":   6,
-    "Absoluut meer belangrijk":      7,
+# ─────────────────────────────────────────────
+# BWM 1–9 schaal
+# Alleen ankerpunten hebben labels
+# ─────────────────────────────────────────────
+
+scale_labels = {
+    1: "Even belangrijk",
+    3: "Licht belangrijker",
+    5: "Duidelijk belangrijker",
+    7: "Veel belangrijker",
+    9: "Extreem belangrijker",
 }
-scale_labels = list(scale.keys())
 
 # ─────────────────────────────────────────────
 # STEP DEFINITIONS
@@ -286,9 +289,9 @@ def save_to_sheets(data: dict):
             data.get("opmerkingen", ""),
         ]
 
-        def to_num(label):
-            """Convert linguistic scale label to numeric value."""
-            return scale.get(label, label) if label else ""
+        def to_num(value):
+    """Values are already numeric."""
+    return value if value else ""
 
         # Category bto values (numeric)
         for cat in cat_list:
@@ -414,9 +417,29 @@ def card_select(options, state_key, descriptions=None):
     return current
 
 def scale_slider(label, key, saved_value=None):
-    default = saved_value if saved_value in scale_labels else scale_labels[0]
-    chosen = st.select_slider(label, options=scale_labels, value=default, key=key)
-    st.caption(f"Numerieke waarde: **{scale[chosen]}**")
+
+    options = list(range(1, 10))
+
+    default = saved_value if saved_value in options else 5
+
+    chosen = st.select_slider(
+        label,
+        options=options,
+        value=default,
+        format_func=lambda x: (
+            f"{x} — {scale_labels[x]}"
+            if x in scale_labels
+            else str(x)
+        ),
+        key=key
+    )
+
+    # Extra uitleg onder slider
+    if chosen in scale_labels:
+        st.caption(f"Interpretatie: **{scale_labels[chosen]}**")
+    else:
+        st.caption("Tussenliggende waarde")
+
     return chosen
 
 def compare_label(term_a, desc_a, term_b, desc_b):
