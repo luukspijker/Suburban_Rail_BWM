@@ -691,7 +691,7 @@ elif st.session_state.step == STEP_PERSONAL:
 # ══════════════════════════════════════════════
 elif st.session_state.step == STEP_CAT_SELECT:
     st.title("Categorievergelijking — Stap 1 van 2")
-    st.markdown("Voor stadsgewestelijk vervoer, selecteer de categorie die u **het meest** en **het minst belangrijk** vindt.")
+    st.markdown("Voor het bijdragen aan succes van een toekomstig stadsgewestelijk railconcept in Nederland, selecteer de categorie die u **het meest** en **het minst belangrijk** vindt.")
 
     if "best_cat_sel" not in st.session_state:
         saved_bc = st.session_state.data.get("categorie_best", None)
@@ -779,7 +779,7 @@ elif STEP_FACTOR_SEL_START <= st.session_state.step < STEP_SUMMARY:
         # ── Pagina A: selecteer beste + slechtste factor ──
         st.title(f"Categorie {cat_index + 1} van {N}: {cat}")
         show_page_image(f"category_{cat_index + 1}")
-        st.markdown(f"Selecteer de **meest** en **minst belangrijke** factor binnen **{cat}**.")
+        st.markdown(f"Voor het bijdragen aan succes van een toekomstig stadsgewestelijk railconcept in Nederland, selecteer de **meest** en **minst belangrijke** factor binnen **{cat}**.")
 
         sel_key_b = f"best_f_sel_{cat}"
         if sel_key_b not in st.session_state:
