@@ -691,7 +691,7 @@ elif st.session_state.step == STEP_PERSONAL:
 # ══════════════════════════════════════════════
 elif st.session_state.step == STEP_CAT_SELECT:
     st.title("Categorievergelijking — Stap 1 van 2")
-    st.markdown("Selecteer de categorie die u **het meest** en **het minst belangrijk** vindt.")
+    st.markdown("Voor stadsgewestelijk vervoer, selecteer de categorie die u **het meest** en **het minst belangrijk** vindt.")
 
     if "best_cat_sel" not in st.session_state:
         saved_bc = st.session_state.data.get("categorie_best", None)
